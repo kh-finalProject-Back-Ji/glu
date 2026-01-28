@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import axios, { formToJSON } from 'axios';
 import {  BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home'
-import Header from './components/Header';
+import Header from './components/Header'
+import Footer from './components/Footer';
 
 function App() {
    const [connection, setConnection] = useState("");
@@ -23,7 +24,7 @@ function App() {
   });
 
   return (
-    <div className='App'>
+    <div className='app'>
       <div style={{ backgroundColor: '#eee', padding: '10px' }}>
         서버 상태: {connection}
       </div>
@@ -32,6 +33,7 @@ function App() {
         <Routes>
           <Route path="/" element={ <Home /> } />
         </Routes>
+      <Footer />
       </Router>
     </div>
   );
