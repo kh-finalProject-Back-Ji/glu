@@ -156,3 +156,17 @@
   gap: 12px;
   align-items: stretch;
 }
+
+/* src/styles/Modal.css 맨 아래에 추가 */
+
+/* ✅ 로그인/회원가입 같은 작은 모달용 */
+.dm-panel--sm{
+  width: min(520px, 92vw);
+  max-height: 88vh;
+  padding: 18px 18px 16px;
+}
+.dm-panel--sm{
+  width: min(520px, 92vw);
+  max-height: 88vh;
+  padding: 18px 18px 16px;
+}

@@ -3,107 +3,141 @@ import ModalBase from "../common/ModalBase";
 import api from "../../api/axios";
 import SignupModal from "./SignupModal";
 import Logo from "../../assets/LOGO.png";
+import "../../styles/LoginModal.css";
 
-const BACKEND = "http://localhost:12345"; // ✅ 백엔드 주소
+const BACKEND = "http://localhost:12345"; // 백엔드 서버 주소 (oauth redirect용)
 
 export default function LoginModal({ open, onClose, onLoginSuccess }) {
   const [form, setForm] = useState({ memberEmail: "", memberPw: "" });
   const [openSignup, setOpenSignup] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const onChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await api.post("/auth/login", form);
+    if (loading) return;
 
-      onLoginSuccess({
-        memberNo: res.data.memberNo,
-        nickname: res.data.memberNickname,
+    try {
+      setLoading(true);
+
+      // ✅ 너 백엔드 컨트롤러 기준: POST /member/login
+      // ✅ DTO(LoginRequest) 필드명이 memberEmail/memberPw 라는 가정 (프론트와 맞춤)
+      const res = await api.post("/member/login", form);
+
+      // res.data = Member (컨트롤러가 Member 그대로 반환)
+      // 너 프로젝트 Member 필드명에 맞춰서 필요 값만 전달
+      onLoginSuccess?.({
+        memberNo: res.data.memberNo ?? res.data.memberId ?? res.data.memberNo,
+        nickname: res.data.nickname ?? res.data.memberNickname,
         profileImg: res.data.profileImg,
+        raw: res.data,
       });
 
-      onClose();
+      onClose?.();
     } catch (err) {
       console.error(err);
-      alert("로그인 실패");
+      alert(err?.response?.data || "로그인 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ OAuth 시작 URL (중요: /api 붙이면 안 됨)
+  // ✅ OAuth: 백엔드에 Spring Security oauth2 설정이 있을 때만 동작
+  // 백엔드의 oauth2 authorization endpoint가 이 경로여야 함.
   const goOAuth = (provider) => {
     window.location.href = `${BACKEND}/oauth2/authorization/${provider}`;
   };
 
-  if (!open) return null;
-
   return (
     <>
-      <ModalBase open={open} onClose={onClose}>
-        <div className="modal-brand">
-          <img src={Logo} alt="Good Sugar" className="modal-brand-logo" />
-          <div className="modal-brand-title">Good Sugar</div>
-        </div>
+      <ModalBase open={open} onClose={onClose} panelClassName="dm-panel--sm">
+        <div className="loginM">
+          {/* ✅ 로고 + Good Sugar 같은 줄, 덩어리 전체 중앙 */}
+          <div className="loginM__brandWrap">
+            <div className="loginM__brandRow">
+              <img src={Logo} alt="Good Sugar" className="loginM__logo" />
+              <span className="loginM__title">Good Sugar</span>
+            </div>
+          </div>
 
-        <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
-          <input
-            className="modal-input"
-            name="memberEmail"
-            value={form.memberEmail}
-            onChange={onChange}
-            placeholder="이메일"
-          />
-          <input
-            className="modal-input"
-            type="password"
-            name="memberPw"
-            value={form.memberPw}
-            onChange={onChange}
-            placeholder="비밀번호"
-          />
+          <form className="loginM__form" onSubmit={onSubmit}>
+            <label className="loginM__label">
+              <span>이메일</span>
+              <input
+                className="loginM__input"
+                name="memberEmail"
+                value={form.memberEmail}
+                onChange={onChange}
+                placeholder="example@email.com"
+                autoComplete="email"
+                required
+              />
+            </label>
 
-          <button className="modal-btn modal-btn-primary" type="submit">
-            로그인
-          </button>
+            <label className="loginM__label">
+              <span>비밀번호</span>
+              <input
+                className="loginM__input"
+                type="password"
+                name="memberPw"
+                value={form.memberPw}
+                onChange={onChange}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
+            </label>
 
-          <button
-            className="modal-btn modal-btn-outline"
-            type="button"
-            onClick={() => setOpenSignup(true)}
-          >
-            회원가입
-          </button>
-        </form>
+            <button
+              className="loginM__btn loginM__btn--primary"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "로그인 중..." : "로그인"}
+            </button>
 
-        <div className="modal-footer-text">메일 인증을 통해 회원가입이 진행됩니다.</div>
+            <button
+              type="button"
+              className="loginM__btn loginM__btn--outline"
+              onClick={() => setOpenSignup(true)}
+            >
+              회원가입
+            </button>
+          </form>
 
-        <div className="modal-divider">또는</div>
+          <div className="loginM__divider">
+            <span>또는</span>
+          </div>
 
-        <div style={{ display: "grid", gap: 10 }}>
-          <button
-            className="social-btn social-google"
-            type="button"
-            onClick={() => goOAuth("google")}
-          >
-            Google로 계속하기
-          </button>
+          <div className="loginM__social">
+            <button
+              type="button"
+              className="loginM__socialBtn google"
+              onClick={() => goOAuth("google")}
+            >
+              Google로 계속하기
+            </button>
 
-          <button
-            className="social-btn social-kakao"
-            type="button"
-            onClick={() => goOAuth("kakao")}
-          >
-            카카오로 계속하기
-          </button>
+            <button
+              type="button"
+              className="loginM__socialBtn kakao"
+              onClick={() => goOAuth("kakao")}
+            >
+              카카오로 계속하기
+            </button>
 
-          <button
-            className="social-btn social-naver"
-            type="button"
-            onClick={() => goOAuth("naver")}
-          >
-            네이버로 계속하기
-          </button>
+            <button
+              type="button"
+              className="loginM__socialBtn naver"
+              onClick={() => goOAuth("naver")}
+            >
+              네이버로 계속하기
+            </button>
+          </div>
+
+          <div className="loginM__footnote">메일 인증을 통해 회원가입이 진행됩니다.</div>
         </div>
       </ModalBase>
 
