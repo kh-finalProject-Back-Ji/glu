@@ -1,0 +1,130 @@
+#container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#main-upper{
+    width:70%;
+    height:100px;
+    border: 1px solid black;
+    margin:20px;
+    margin-top:50px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+#main-box{
+    width:70%;
+    height:800px;
+    border:1px solid black;
+    margin:20px;
+    display: flex;
+    justify-content: center;
+}
+
+#left{
+    margin:20px;
+    height:760px;
+    border:1px solid grey;
+    width:45%;
+}
+
+#right{
+    margin:20px;
+    height:760px;
+    border:1px solid grey;
+    width:45%;
+}
+
+#wrong-note-search-area{
+    width:200px;
+}
+
+#upper-lower{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrong-note-inner-content{
+    border:1px solid skyblue;
+    margin:20px;
+}
+
+
+/* 오답노트 등록 창 */
+#wrongNote-add-window{
+    flex-direction: column;
+    width:600px;
+    height:auto;
+    top:15%;
+    left:35%;
+    display: hidden;
+    border: 2px solid black;
+    padding:20px;
+    position:absolute;
+    background-color: white;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#wrongNote-add-window > section:first-child{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:10px;
+}
+
+.w-hidden{
+    display:none;
+}
+
+.w-show{
+    display:block;
+}
+
+#login-window > section{
+    display: flex;
+    flex-direction: column;
+}
+
+#wrongNote-input-area{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #d6d7dd;
+}
+
+.wInput{
+    width:80%;
+    margin:20px;
+
+}
+
+#insert-wrongNoteContent{
+    height:300px;
+}
+
+#insert-wrongNoteMyanswer{
+    height:200px;
+}
+
+#insert-wrongNoteExplain{
+    height:300px;
+}
+
+#wrongNote-add-window::-webkit-scrollbar {
+    width: 8px;
+}
+#wrongNote-add-window::-webkit-scrollbar-thumb {
+    background-color: #553cdf;
+    border-radius: 10px;
+}
+#wrongNote-add-window::-webkit-scrollbar-track {
+    background-color: #d3d6e9;
+}
+
+/* ------------------------------------------------- */

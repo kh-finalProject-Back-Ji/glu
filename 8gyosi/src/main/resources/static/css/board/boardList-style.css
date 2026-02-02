@@ -1,0 +1,339 @@
+.COLORPALLETE{
+    color:#D9DED1;
+    color:#F2EADD;
+    color:#A2B7A8;
+    color:#506E66;
+    color:#373E3B;
+    color:#FCD1A0;
+    color:#f8a814
+}
+
+*{
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  margin: auto; /* 좌우 가운데 정렬을 위해서 */
+  background-color: #D9DED1;
+  overflow: hidden;
+  
+}
+
+.board-wrapper{
+    background-color: #f1f3ee;
+    max-width: 1200px;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.board-list {
+    width: 100%;
+    margin: 0px;
+    background-color:5c86e0;
+    
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column; 
+}
+
+.board-name {    
+    display: flex;
+    list-style: none;
+    background: #506E66;
+    height: 60px;
+    align-items: center;
+    margin:0px;
+    border-top-left-radius: 12px;
+    border-top-left-radius: 12px;
+    color: #f1f3ee;
+    padding-left: 20px;
+
+}
+
+.board-list > ul {
+    display: flex;
+    list-style: none;
+    background: #5c86e0;
+    height: 60px;
+    align-items: center;
+    margin:0px;
+
+    border-radius: 12px;
+
+}
+
+.board-list > ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 0 15px;
+    font-size: 16px;
+    opacity: 0.8;
+    transition: 0.3s;
+}
+
+/*현재 조회중인 게시판이름에 적용될 수 있도록 추후에 바꾸기*/
+.board-list > ul li:first-child a {
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 1;
+}
+
+.board-list > ul li a:hover {
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 1;
+}
+
+/* 조회 게시판 영역 */
+.list-wrapper {
+    padding: 20px 30px;
+    max-width: 1200px;
+}
+.list-wrapper td a{
+    color: #373E3B;
+    text-decoration: none;
+}
+.list-wrapper td a:hover{
+    color: #f8a814;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table thead th {
+    color: #373E3B;
+    padding: 15px 5px;
+    border-bottom: 2px solid #A2B7A8;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+table tbody td {
+    padding: 15px 5px;
+    border-bottom: 1px solid #d7e4da;
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+}
+
+table tbody td:nth-child(3) {
+    text-align: left;
+    padding-left: 20px;
+}
+
+/* 페이지네이션 */
+.pagination-area {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.pagination li {
+    display: flex; /* 가로 배열 유지 */
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: #666;
+    font-size: 14px;
+    width: 30px;  /* 원형 크기 고정 */
+    height: 30px;
+    border-radius: 50%; /* 기본적으로 원형 틀 유지 */
+    transition: 0.3s;
+}
+
+.pagination a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.pagination li a.current {
+    width: 100%;
+    background-color: #5c86e0;
+    font-weight: bold;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+
+}
+
+/* 검색창 영역 */
+.btn-area {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 30px;
+    margin-bottom: 10px;
+}
+
+#insertBtn {
+    background-color: #5c86e0;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+#insertBtn:hover {
+    background-color: #4a6ec4;
+}
+
+
+form[name="searchForm"] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0 40px 0;
+}
+
+
+
+#searchKey {
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    border-right: none; /* 인풋창과 붙이기 */
+    border-radius: 4px 0 0 4px;
+    outline: none;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#searchQuery {
+    width: 320px;
+    height: 40px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+#searchBtn {
+    width: 45px;
+    height: 40px;
+    background-color: #5c86e0;
+    color: white;
+    border: 1px solid #5c86e0;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+
+/*========================== footer ================================*/
+footer {
+
+    background-color: #D9E1F0;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 13px;
+}
+
+
+footer > div {
+    display: flex;
+    width: 1440px;
+    margin: auto;
+}
+
+
+
+footer > div > section:first-of-type {
+     flex-basis: 35%;
+}
+
+footer > div > section:nth-of-type(2) {
+    flex-basis: 20%;
+}
+
+footer > div > section:nth-of-type(3) {
+    flex-basis: 35%;
+}
+
+footer > div > section:last-of-type {
+    flex-basis: 10%;
+}
+
+
+
+/* footer left */
+
+footer > div section:first-child ul {
+    display: flex;
+    gap: 20px;
+    max-width: 500px;
+    list-style: none;
+}
+
+footer > div section:first-child ul li a {
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+}
+
+footer > div section:first-child ul li a:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+
+
+/* footer right */
+footer > div section:last-child {
+    display: flex;
+    align-items: right;
+    gap: 20px;
+    width: 100px;
+    margin: auto;
+}
+
+footer > div section:last-child pre {
+    margin: 0;
+    color: #666;
+    max-width: 600px;
+    text-align: left;
+    line-height: 1.4;
+}
+
+
+#arrowUpBtn {
+    width: 50px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    background-color: #D9E1F0;
+    transition: background-color 0.2s;
+    align-items: right;
+    font-size: 24px;
+}
+
+#arrowUpBtn:hover {
+    border: #333;
+    border-radius: 50%;
+    background-color: white;
+} 

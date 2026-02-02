@@ -1,0 +1,66 @@
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    CommentMapper.xml
+    - 댓글 및 대댓글 CRUD
+    - BoardComment DTO와 호환
+-->
+<mapper namespace="edu.kh.eightgyosi.board.model.mapper.CommentMapper">
+
+    <!-- 댓글/대댓글 목록 조회 -->
+    <select id="selectCommentList" parameterType="int" resultType="BoardComment">
+        SELECT
+            C.COMMENT_NO,
+            C.BOARD_ID,
+            C.MEMBER_NO,
+            M.MEMBER_NICKNAME,
+            C.COMMENT_CONTENT,
+            C.COMMENT_WRITE_DATE,
+            C.PARENT_COMMENT_NO,
+            C.COMMENT_DEL_FL
+        FROM "COMMENT" C
+        JOIN MEMBER M ON C.MEMBER_NO = M.MEMBER_NO
+        WHERE C.BOARD_ID = #{boardId}
+        ORDER BY C.PARENT_COMMENT_NO NULLS FIRST, C.COMMENT_WRITE_DATE
+    </select>
+
+    <!-- 댓글/대댓글 등록 -->
+    <insert id="insertComment" parameterType="BoardComment">
+        INSERT INTO "COMMENT"
+        VALUES(SEQ_COMMENT_NO.NEXTVAL, #{commentContent}, DEFAULT, DEFAULT, #{boardId}, #{memberNo}, 
+		<if test="parentCommentNo != 0">
+			#{parentCommentNo}
+		</if>	
+		<if test="parentCommentNo == 0">
+			NULL
+		</if>
+		)
+    </insert>
+
+    <!-- 단일 댓글 조회 -->
+    <select id="selectComment" parameterType="int" resultType="BoardComment">
+        SELECT *
+        FROM "COMMENT"
+        WHERE COMMENT_NO = #{commentNo}
+    </select>
+
+    <!-- 댓글/대댓글 삭제 -->
+    <delete id="deleteComment">
+        UPDATE "COMMENT"
+		SET COMMENT_DEL_FL = 'Y',
+		COMMENT_CONTENT = '삭제된 댓글입니다.'
+		WHERE COMMENT_NO = #{commentNo}
+		AND MEMBER_NO = #{memberNo}
+    </delete>
+    
+    <!--  댓글 수정 -->
+    <update id="updateComment">
+	    UPDATE "COMMENT" SET
+    	COMMENT_CONTENT = #{commentContent}
+   		 WHERE COMMENT_NO = #{commentNo}
+	 </update>
+    
+
+</mapper>

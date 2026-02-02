@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.kh.eightgyosi.board.model.mapper.EditBoardMapper">
+
+    <!-- ===================== 게시글 작성 ===================== -->
+    <insert id="insertBoard">
+        <selectKey keyProperty="boardId" resultType="int" order="BEFORE">
+            SELECT SEQ_BOARD_ID.NEXTVAL AS boardId FROM DUAL
+        </selectKey>
+        INSERT INTO board (
+            board_id, board_title, board_content, board_view_count,
+            board_is_deleted, board_create_date, board_update_date,
+            board_type_no, member_no
+        )
+        VALUES (
+            #{boardId}, #{boardTitle}, #{boardContent}, 0,
+            'N', SYSDATE, SYSDATE,
+            #{boardTypeNo}, #{memberNo}
+        )
+    </insert>
+
+    <!-- ===================== 게시글 수정 ===================== -->
+    <update id="updateBoard">
+        UPDATE board
+        SET board_title = #{boardTitle},
+            board_content = #{boardContent},
+            board_update_date = SYSDATE
+        WHERE board_id = #{boardId}
+    </update>
+
+    <!-- ===================== 게시글 삭제 ===================== -->
+    <delete id="deleteBoard">
+        DELETE FROM board
+        WHERE board_id = #{boardId} AND member_no = #{memberNo}
+    </delete>
+
+    <!-- ===================== 단일 게시글 조회 ===================== -->
+    <select id="selectBoardDetail" resultType="edu.kh.eightgyosi.board.model.dto.Board">
+        SELECT 
+            board_id       AS boardId,
+            board_title    AS boardTitle,
+            board_content  AS boardContent,
+            board_view_count AS boardViewCount,
+            board_is_deleted AS boardIsDeleted,
+            TO_CHAR(board_create_date,'YYYY-MM-DD HH24:MI:SS') AS boardCreateDate,
+            TO_CHAR(board_update_date,'YYYY-MM-DD HH24:MI:SS') AS boardUpdateDate,
+            board_type_no  AS boardTypeNo,
+            member_no      AS memberNo
+        FROM board
+        WHERE board_id = #{boardId}
+    </select>
+
+    <!-- ===================== 게시글 이미지 조회 ===================== -->
+    <select id="selectBoardImages" resultType="edu.kh.eightgyosi.board.model.dto.BoardImage">
+        SELECT 
+            img_no            AS imgNo,
+            board_id          AS boardId,
+            img_order         AS imgOrder,
+            img_path          AS imgPath,
+            img_rename        AS imgRename,
+            img_original_name AS imgOriginalName,
+            img_size          AS imgSize
+        FROM board_img
+        WHERE board_id = #{boardId}
+        ORDER BY img_order ASC
+    </select>
+
+    <!-- ===================== 단일 이미지 조회 ===================== -->
+    <select id="selectBoardImageById" resultType="edu.kh.eightgyosi.board.model.dto.BoardImage">
+        SELECT 
+            img_no            AS imgNo,
+            board_id          AS boardId,
+            img_order         AS imgOrder,
+            img_path          AS imgPath,
+            img_rename        AS imgRename,
+            img_original_name AS imgOriginalName,
+            img_size          AS imgSize
+        FROM board_img
+        WHERE img_no = #{imgNo}
+    </select>
+
+    <!-- ===================== 게시글 파일 조회 ===================== -->
+    <select id="selectBoardFiles" resultType="edu.kh.eightgyosi.board.model.dto.BoardFile">
+        SELECT 
+            uploadfile_no      AS uploadfileNo,
+            board_id           AS boardId,
+            uploadfile_origin  AS uploadfileOrigin,
+            uploadfile_strg    AS uploadfileStrg,
+            uploadfile_size    AS uploadfileSize,
+            uploadfile_date    AS uploadfileDate,
+            uploadfile_path    AS uploadfilePath
+        FROM board_file
+        WHERE board_id = #{boardId}
+    </select>
+
+    <!-- ===================== 단일 파일 조회 ===================== -->
+    <select id="selectBoardFile" resultType="edu.kh.eightgyosi.board.model.dto.BoardFile">
+        SELECT 
+            uploadfile_no      AS uploadfileNo,
+            board_id           AS boardId,
+            uploadfile_origin  AS uploadfileOrigin,
+            uploadfile_strg    AS uploadfileStrg,
+            uploadfile_size    AS uploadfileSize,
+            uploadfile_date    AS uploadfileDate,
+            uploadfile_path    AS uploadfilePath
+        FROM board_file
+        WHERE uploadfile_no = #{fileNo}
+    </select>
+
+    <!-- ===================== 게시글 댓글 조회 ===================== -->
+    <select id="selectBoardComments" resultType="edu.kh.eightgyosi.board.model.dto.BoardComment">
+        SELECT 
+            comment_no         AS commentNo,
+            board_id           AS boardId,
+            member_no          AS memberNo,
+            parent_comment_no  AS parentCommentNo,
+            comment_content    AS commentContent,
+            comment_write_date AS commentWriteDate,
+            comment_del_fl     AS commentDelFl
+        FROM comment
+        WHERE board_id = #{boardId}
+        ORDER BY comment_write_date ASC
+    </select>
+
+    <!-- ===================== 이미지 삽입 ===================== -->
+    <insert id="insertBoardImage">
+        INSERT INTO board_img (
+            img_no,
+            board_id,
+            img_order,
+            img_path,
+            img_rename,
+            img_original_name,
+            img_size
+        )
+        VALUES (
+            SEQ_IMG_NO.NEXTVAL,
+            #{boardId},
+            #{imgOrder},
+            #{imgPath},
+            #{imgRename},
+            #{imgOriginalName},
+            #{imgSize}
+        )
+    </insert>
+
+    <!-- ===================== 이미지 삭제 ===================== -->
+    <delete id="deleteBoardImage">
+        DELETE FROM board_img WHERE img_no = #{imgNo}
+    </delete>
+
+    <!-- ===================== 파일 삽입 ===================== -->
+   <!-- ===================== 파일 삽입 ===================== -->
+<!-- ===================== 파일 삽입 ===================== -->
+<insert id="insertBoardFile">
+    INSERT INTO board_file (
+        uploadfile_no,
+        board_id,
+        uploadfile_origin,
+        uploadfile_strg,
+        uploadfile_path,
+        uploadfile_date,
+        uploadfile_size
+    )
+    VALUES (
+        SEQ_BOARD_FILE_NO.NEXTVAL,
+        #{boardId},
+        #{uploadfileOrigin},
+        #{uploadfileStrg},
+        #{uploadfilePath},
+        SYSDATE,
+        #{uploadfileSize}
+    )
+</insert>
+
+
+    <!-- ===================== 파일 삭제 ===================== -->
+    <delete id="deleteBoardFile">
+        DELETE FROM board_file WHERE uploadfile_no = #{fileNo}
+    </delete>
+
+    <!-- ===================== 이미지 최대 순서 조회 ===================== -->
+    <select id="selectMaxImgOrder" resultType="int">
+        SELECT NVL(MAX(img_order), 0) AS maxOrder
+        FROM board_img
+        WHERE board_id = #{boardId}
+    </select>
+
+    <!-- ===================== 게시판 카테고리 조회 ===================== -->
+    <select id="selectCategoryList" resultType="edu.kh.eightgyosi.board.model.dto.BoardType">
+        SELECT 
+            board_type_no   AS boardTypeNo,
+            board_type_name AS boardTypeName
+        FROM board_type
+        ORDER BY BOARD_TYPE_NO ASC
+    </select>
+
+    <!-- ===================== 게시글 좋아요 체크 ===================== -->
+    <select id="selectBoardLikeCheck" resultType="int">
+        SELECT COUNT(*) 
+        FROM board_like
+        WHERE board_id = #{boardId} AND member_no = #{memberNo}
+    </select>
+
+    <!-- ===================== 좋아요 추가 ===================== -->
+    <insert id="insertBoardLike">
+        INSERT INTO board_like (board_id, member_no)
+        VALUES (#{boardId}, #{memberNo})
+    </insert>
+
+    <!-- ===================== 좋아요 삭제 ===================== -->
+    <delete id="deleteBoardLike">
+        DELETE FROM board_like
+        WHERE board_id = #{boardId} AND member_no = #{memberNo}
+    </delete>
+
+</mapper>
+
+
+

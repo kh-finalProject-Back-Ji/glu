@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오답노트</title>
+
+    <link rel="stylesheet" href="/css/myPage/myPage-wrongNote.css">
+    <th:block th:replace="~{common/common}"></th:block>
+</head>
+<body>
+    <th:block th:replace="~{common/header}"></th:block>
+    
+    <container id="container">
+        <section id="main-upper">
+            <div>다이어리</div>
+            <div id="upper-lower">
+                <button id="leftBtn">&lt;</button>
+                <fieldset id="wrong-note-search-area">
+                    <form action="" method="get">
+                        <input name="select-problem" type="text">
+                        <button type="submit">검색</button>
+                    </form>
+                </fieldset>
+                <button id="rightBtn">&gt;</button>
+            </div>
+        </section>
+
+        <!-- 오답노트 정보가 없을 때 -->
+        <th:block th:if="${#lists.isEmpty(wrongNoteDTOLists)}">
+        <section id="main-box">
+            <section id="left">
+                <div id="wrong-note-title" class="wrong-note-inner-content">문제 제목이 없습니다</div>
+                <div id="wrong-note-content" class="wrong-note-inner-content">문제 내용이 없습니다</div>
+                <div id="wrong-note-myanswer" class="wrong-note-inner-content">내 정답이 없습니다</div>
+            </section>
+            <section id="right">
+                <div id="wrong-note-explain" class="wrong-note-inner-content">풀이 내용이 없습니다</div>
+                <button id="addBtn">추가</button>
+            </section>
+        </section>
+        </th:block>
+
+        <!-- 오답노트 정보가 있을 때 -->
+        <th:block th:unless="${#lists.isEmpty(wrongNoteDTOLists)}">
+			<th:block th:each="tempList : ${wrongNoteDTOLists}" th:if="${tempList.wrongNoteNo == wrongNoteNo}" th:object="${tempList}">
+		        <section id="main-box">
+		            <section id="left">
+		                <div th:text="*{wrongNoteTitle}" id="wrong-note-title" class="wrong-note-inner-content">
+		                    문제 제목이 없습니다</div>
+		                <div th:text="*{wrongNoteContent}" id="wrong-note-content" class="wrong-note-inner-content">문제 내용이 없습니다</div>
+		                <div th:text="*{wrongNoteMyanswer}" id="wrong-note-myanswer" class="wrong-note-inner-content">문제 정답이 없습니다</div>
+		            </section>
+		            <section id="right">
+		                <div th:text="*{wrongNoteExplain}" id="wrong-note-explain" class="wrong-note-inner-content">풀이 내용이 없습니다</div>
+		                <button id="addBtn">추가</button>
+		            </section>
+		        </section>
+			</th:block>
+        </th:block>
+       
+        <!-- 오답노트 추가 버튼 클릭 시 띄울 창 -->
+    	<div id="wrongNote-add-window" class="w-hidden">
+		
+        <section>
+            <div>오답노트 등록 창</div>
+            <div><button id="wrongNote-add-window-close">닫기</button></div>
+        </section>
+
+		<form th:action="@{/myPage/myPage-wrongNote/{wrongNoteNo}(wrongNoteNo=${wrongNoteDTOLists[0].wrongNoteNo})}" method="POST" id="wrongNote-add-form">
+
+			<fieldset id="wrongNote-input-area">
+                문제 출처는 어딘가요?
+				<input class="wInput" type="text" name="wrongNoteTitle" placeholder="오답노트 제목을 입력해주세요." id="insert-wrongNoteTitle">
+                어떤 문제였나요?
+				<input class="wInput" type="text" name="wrongNoteContent" placeholder="문제 내용을 입력해주세요." id="insert-wrongNoteContent">
+                내가 쓴 답은 무엇이었나요?
+				<input class="wInput" type="text" name="wrongNoteMyanswer" placeholder="내가 쓴 답을 입력해주세요." id="insert-wrongNoteMyanswer">
+                문제의 풀이는 어떻게 되나요?
+				<input class="wInput" type="text" name="wrongNoteExplain" placeholder="문제풀이를 입력해주세요." id="insert-wrongNoteExplain">
+                <input type="hidden" name="wrongNoteUnderstood" value="1">
+				<label>
+                    <input type="radio" name="wrongNoteType" value="1" class="insert-wrongNoteType">객관식
+                    <input type="radio" name="wrongNoteType" value="2" class="insert-wrongNoteType">주관식
+                    <input type="radio" name="wrongNoteType" value="3" class="insert-wrongNoteType">논술형 
+                </label>
+			</fieldset> 
+			<button type="submit">저장</button>
+		</form>
+	</div>
+
+    </container>
+	
+	<!-- th:inline 이용한 javascript 호출은 항상 js 호출보다 먼저 와야 합니다-->
+	<script th:inline="javascript">
+			
+			// 오답노트 정보 담아 js 로 전달
+			const wrongNoteList = [[${wrongNoteDTOLists}]];
+			console.log(wrongNoteList);
+
+		</script>
+		
+    <script src="/js/myPage/myPage-wrongNote.js"></script>
+	
+    <th:block th:replace="~{common/footer}"></th:block>
+	
+	
+</body>
+</html>

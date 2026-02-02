@@ -1,0 +1,106 @@
+<head>
+	<link rel="stylesheet" href="/css/common/header.css">
+</head>
+
+<script src="https://kit.fontawesome.com/1162b5b0f6.js" crossorigin="anonymous"></script>
+
+<header>
+
+
+	<section>
+		<!-- 클릭 시 메인 페인지로 이동하는 로고 -->
+		<a href="/">
+			<img src="/images/logo.png" alt="메인 로고" id="homeLogo">
+		</a>
+	</section>
+
+	<section></section> 
+
+  	<section id="btn-area">
+
+		<div class="board-header">
+			<div>
+				<a href="#">게시판</a><!-- 2. 안 쓰는 섹션-->
+			</div>
+			<ul id="board-nav">
+				<li th:each="boardType : ${application.boardTypeList}">
+				<a th:href="@{/board/{boardTypeNo}(boardTypeNo=${boardType.boardTypeNo})}" 
+				th:text="${boardType.boardTypeName}" id="board-header-name"></a></li>
+			</ul>
+		</div>
+
+		<div> <!--3. 채팅 -->
+			<a href="/chatting/list">채팅</a>
+		</div>
+
+		<!-- 4. 로그인이 되어 있지 않은 경우 -->
+		<th:block th:if="${session.loginMember == null}">
+			<div>
+				<a href="#" id="login-link">로그인</a>
+			</div>
+		</th:block>
+
+		<!-- 5. 로그인이 되어 있는 경우 -->
+		<th:block th:if="${session.loginMember != null}">
+			<div id="when-login-area">
+				<a href="/myPage">test</a>
+			</div>
+			<div>
+				<a href="/8gyosi/logout" id="logout-link">로그아웃</a>
+			</div>
+		</th:block>
+
+	</section>
+
+	<!-- 로그인 창 부분 -->
+	<div id="login-window" class="hidden">
+
+		<div>
+			<div>8교시</div>
+			<button id="login-window-close">&times;</button>
+		</div>
+
+		<!-- id 속성 : login-form 으로 변경 -->
+		<form action="/8gyosi/login" method="POST" id="login-form">
+			<fieldset id="login-area">
+				이메일
+				<input type="text" name="memberEmail" placeholder="이메일을 입력해주세요.">
+				비밀번호
+				<input type="password" name="memberPw" placeholder="비밀번호를 입력해주세요.">
+			</fieldset>
+			<label>
+				<input type="checkbox" name="saveId" id="saveId">
+				아이디저장
+			</label>
+			<button>로그인하기</button>
+		</form>
+
+		<section>
+
+			<form action="/8gyosi/signup">
+				<button id="signup" type="submit">회원가입</button>
+			</form>
+
+			<div>
+				<button button id="findEmailPw">이메일/비밀번호 찾기</button>
+			</div>
+
+		</section>
+	</div>
+
+	
+	<script src="/js/common/header.js"></script>
+	<script src="/js/main.js"></script>
+
+	
+</header>
+
+  <!-- 알림창을 띄우는 공통 스크립트 로직은 footer 에 넣는게 효과적 : dasol -->
+	<!-- redirect Attribute 에 담길 전역 message 부분 선언-->
+	<!-- <script th:inline="javascript">
+		const message =  /*[[${message}]]*/ "전달 받은 message";
+		if(message != null) alert(message);
+	</script> -->
+
+</header> 
+-->

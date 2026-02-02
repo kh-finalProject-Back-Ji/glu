@@ -1,0 +1,194 @@
+/* 2. body를 Flex 컨테이너로 만들기 (세로 방향) */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    
+    /* ⚠️ 중요: 아래 속성이 있다면 반드시 지우거나 flex-start로 바꿔줘! */
+    /* justify-content: center;  <-- (X) 이게 있으면 헤더가 내려와요 */
+    
+    justify-content: flex-start; /* (O) 위에서부터 시작! (기본값이라 안 써도 됨) */
+}
+
+/* 3. 본문 영역이 남은 공간 다 차지하기 (핵심!) */
+/* HTML에서 본문을 감싸는 태그에 main 이라는 태그를 쓸 거야 */
+main {
+    flex: 1;                  /* 남은 빈 공간을 다 차지해서 헤더/푸터를 밀어냄 */
+    
+    display: flex;            /* 내부 정렬을 위한 플렉스 */
+    justify-content: center;  /* 세로(상하) 가운데 정렬 ★여기에 있어야 해★ */
+    align-items: center;      /* 가로(좌우) 가운데 정렬 */
+    flex-direction: column;   /* (선택) 내부 요소 세로 배치 */
+}
+
+/* 푸터는 내용만큼만 높이 차지 */
+footer {
+    height: fit-content; /* 혹은 지정된 높이 (예: 100px) */
+}
+
+/* 1. 전체 레이아웃 (부모 컨테이너) */
+.myPage-content {
+    display: flex;               /* 가로 배치 시작! */
+    width: 1000px;               /* 전체 너비 고정 */
+    margin: 0;           /* 화면 중앙 정렬 */
+    align-items: flex-start;     /* 위쪽 라인 맞춤 */
+    gap: 30px;                   /* 사이드 메뉴와 본문 사이 간격 */
+}
+
+/* 2. 사이드 메뉴 스타일 (불러온 조각) */
+/* 주의: 사이드 메뉴 파일(myPage-sideMenu.html)의 가장 바깥 태그 클래스가 
+   .left-side 라고 가정하고 작성했어! */
+.left-side {
+    width: 250px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    padding-left: 10px;
+    border-left: 4px solid #4A90E2; 
+}
+
+/* 리스트 스타일 제거 및 간격 조절 */
+.list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-group li {
+    margin-bottom: 5px;
+}
+
+/* 메뉴 링크 스타일 */
+.list-group a {
+    text-decoration: none;
+    color: #555;
+    display: block;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* 마우스 올렸을 때 & 현재 메뉴 강조 */
+.list-group a:hover {
+    background-color: #f0f7ff;
+    color: #4A90E2;
+    padding-left: 20px; /* 살짝 오른쪽으로 미는 효과 */
+}
+
+/* (선택) 현재 보고 있는 메뉴 강조용 클래스 */
+/* 나중에 JS나 Thymeleaf로 active 클래스를 추가하면 더 예뻐! */
+.list-group a.active {
+    background-color: #4A90E2;
+    color: white;
+    font-weight: bold;
+}
+
+/* 3. 내 정보 본문 스타일 (오른쪽) */
+.myPage-main {
+    flex: 1;                     /* 남은 공간 꽉 채우기 */
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 40px;               /* 내부 여백 넉넉하게 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* 살짝 그림자 */
+}
+
+/* 제목 스타일 */
+.myPage-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.myPage-subject {
+    font-size: 14px;
+    color: #888;
+    display: block;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #4A90E2; /* 8교시 파란색 */
+    padding-bottom: 15px;
+}
+
+/* 4. 입력 폼 행(Row) 공통 스타일 */
+.myPage-row {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column; /* 라벨과 인풋을 위아래로 */
+}
+
+.myPage-row label, .info-title span {
+    font-size: 15px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+/* 텍스트 입력창 공통 */
+input[type="text"] {
+    height: 45px;
+    padding: 0 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: #4A90E2;
+}
+
+/* 5. 주소 영역 디테일 잡기 (.info-address) */
+/* 주소창들은 라벨이 없으므로 간격을 좀 좁게 */
+.info-address {
+    margin-bottom: 10px; 
+    flex-direction: row; /* 검색 버튼과 옆으로 나란히 */
+    gap: 10px;
+}
+
+/* 인풋창이 가로 공간을 다 차지하도록 */
+.info-address input {
+    flex: 1; 
+}
+
+/* 검색 버튼 스타일 */
+#searchAddress {
+    width: 80px;
+    height: 45px;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#searchAddress:hover {
+    background-color: #333;
+}
+
+/* 6. 수정하기 버튼 (맨 아래) */
+.myPage-submit {
+    width: 100%;
+    height: 50px;
+    margin-top: 20px;
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.myPage-submit:hover {
+    background-color: #357ABD;
+}

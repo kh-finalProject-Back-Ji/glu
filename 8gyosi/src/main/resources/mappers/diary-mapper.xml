@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.kh.eightgyosi.mypage.model.mapper.DiaryMapper">
+
+	<!-- 일기장 내용 저장-->
+	<insert id="insertDiary">
+        INSERT INTO "DIARY" ( 
+            DIARY_DATE, 
+            DIARY_TITLE, 
+            DIARY_CONTENT, 
+            MEMBER_NO
+        ) VALUES (
+			#{diaryDate},  
+			#{diaryTitle}, 
+            #{diaryContent}, 
+            #{memberNo})
+    </insert>
+
+	<!-- 일기장 내용 조회 -->
+	<select id="selectDiary" resultType="DiaryDTO">
+		SELECT DIARY_TITLE "diaryTitle",
+		DIARY_CONTENT "diaryContent",
+		MEMBER_NO "memberNo",
+		DIARY_DATE "diaryDate"
+		FROM DIARY  
+		WHERE (TRIM(DIARY_DATE) = #{diaryDate})
+		AND (MEMBER_NO = #{memberNo})
+	</select>
+	
+	<!-- 일기장 내용 삭제 -->
+	<delete id="deleteDiary">
+		DELETE FROM DIARY 
+		WHERE (DIARY_DATE = TRIM(#{diaryDate}))
+		AND (MEMBER_NO = #{memberNo})
+	</delete>
+	
+	
+	<!-- 일기장 작성일 중복 확인 -->
+	<select id="checkWriteDate" resultType="Integer">
+		SELECT COUNT(DIARY_TITLE) 
+		FROM DIARY 
+		WHERE (TRIM(DIARY_DATE) = #{diaryDate})
+		AND (MEMBER_NO = #{memberNo})
+	</select>
+	
+	
+	
+	<insert id="updateQuotes" >
+		UPDATE MEMBER
+		SET QUOTES_CONTENT = #{quotesContent}, QUOTES_FONT_SIZE = #{fontSize}, QUOTES_FONT_FAMILY = #{fontFamily}
+		WHERE MEMBER_NO = #{memberNo}
+	</insert>
+	
+	<select id="selectquotesFont">
+		SELECT QUOTES_CONTENT "quotesContent", QUOTES_FONT_SIZE "fontSize", QUOTES_FONT_FAMILY "fontFamily"
+		FROM MEMBER
+		WHERE MEMBER_NO = #{memberNo}
+	</select>
+</mapper>

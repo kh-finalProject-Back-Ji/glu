@@ -1,0 +1,248 @@
+.COLORPALLETE{
+    color:#D9DED1;
+    color:#F2EADD;
+    color:#A2B7A8;
+    color:#506E66;
+    color:#373E3B;
+    color:#FCD1A0;
+    color:#f8a814
+}
+/* boardWrite-style.css 기반, boardDetail 전용 */
+* { 
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+html, body {
+  margin: 0;
+}
+
+body {
+  background-color: #F2EADD;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin: 60px auto 50px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 12px;
+}
+
+.write-box {
+  width: 1230px;
+  min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 50px;
+}
+
+/* 제목 영역 */
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-color: #506E66;
+  gap: 10px;
+  border-radius: 4px 4px 0 0;
+  color: #D9DED1;
+  font-size: 14px;
+}
+
+.board-info, .file-wrapper, .like-area, #commentSection {
+  margin: 0 15px 0 15px;
+  padding: 15px;
+}
+
+/*닉네임 조회수 날짜 */
+.board-info {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+}
+
+
+/* 본문 */
+.content-wrapper {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.content-wrapper div {
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 400px;
+}
+
+/* 이미지/파일 */
+.boardImg,
+.boardFile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.boardFile a {
+  text-decoration: none;
+  color: #5f86e5;
+}
+
+/* 좋아요 */
+#boardLike{
+  font-size: 1em;
+  color: red;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.08));  
+}
+
+/* 댓글 */
+#commentSection{
+  border-top: 1px solid #ccc;
+}
+
+.comment-wrapper {
+  margin-top: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.comment-wrapper p {
+  padding: 6px 0;
+  border-bottom: 1px dashed #ccc;
+}
+
+/* 댓글 */
+.commentList {
+  list-style: none;
+}
+
+#commentIcon{
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);  
+}
+.comment-row {
+    border-bottom: 1px solid #eee;
+    padding: 15px 10px;
+}
+
+#commentContent-area {
+  display: flex;
+  justify-content: center;
+}
+
+#commentContent {
+  width: 900px;
+  min-height: 80px;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.08);  
+}
+
+#addCommentBtn {
+  height: 80px;
+  width: 75px;
+  margin: 10px 0 0 3%;
+  padding: 10px;
+  margin-right: 5px;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  background-color: #5f86e5;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.08);  
+}
+
+/* 답글  */
+.child-comment {
+    margin-left: 40px;
+    background-color: #f9f9f9;
+
+}
+
+/* 수정 및 답글용 입력창 */
+.commentInsertContent, .update-textarea {
+    width: 100%;
+    min-height: 80px;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+/* 답글 수정 삭제 버튼 스타일 */
+.comment-btn-area button, .saveBtn, .cancelBtn, .addReplyBtn {
+  margin: 5px 5px 0 0;
+  width: 30px;
+  height: 25px;
+  cursor: pointer;
+  background-color: #5f86e5;
+  border-radius: 3px;
+  color: white;
+  border: none;
+}
+
+/* 답글 텍스트 영역 */
+.reply-textarea, .edit-textarea {
+    width: 900px;
+  min-height: 80px;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.08);  
+}
+
+
+/* ================= DARK MODE ================= */
+body.dark {
+  background-color: #121212;
+  color: #e5e5e5;
+}
+
+body.dark .title-wrapper {
+  background-color: #1f1f1f;
+  color: #e5e5e5;
+}
+
+body.dark .content-wrapper div {
+  background-color: #1a1a1a;
+  color: #e5e5e5;
+  border: 1px solid #555;
+}
+
+body.dark .boardFile a {
+  color: #22d3ee;
+}
+
+body.dark .like-area button {
+  background-color: #22d3ee;
+  color: #121212;
+}
+
+body.dark .comment-wrapper p {
+  border-color: #555;
+}

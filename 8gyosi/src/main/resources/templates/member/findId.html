@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>8gyosi - 아이디 찾기</title>
+  <link rel="stylesheet" href="/css/member/signup-style.css">
+</head>
+
+<body>
+
+  <th:block th:replace="~{common/header}"></th:block>
+
+  <main class="container">
+    <section class="signup-card">
+      <div class="card-header">아이디 찾기</div>
+
+      <form action="/member/findId" method="POST" name="findIdForm" id="findIdForm">
+
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
+          계정에 등록된 이름과 이메일을 입력해 주세요.
+        </p>
+
+        <label for="memberName">
+          <span class="required">*</span> 닉네임
+        </label>
+        <div class="signUp-input-area">
+          <input type="text" name="memberName" id="memberName" placeholder="이름 입력" maxlength="20" autocomplete="off">
+        </div>
+        <span class="signUp-message" id="nameMessage">가입 시 등록한 닉네임을 입력해주세요.</span>
+
+        <br>
+        <br>
+
+        <label for="memberEmail">
+          <span class="required">*</span> 이메일
+        </label>
+        <div class="signUp-input-area">
+          <input type="text" name="memberEmail" id="memberEmail" placeholder="가입한 이메일 입력" maxlength="30"
+            autocomplete="off">
+          <button id="sendAuthKeyBtn" type="button">인증번호 받기</button>
+        </div>
+        <span class="signUp-message" id="emailMessage"></span>
+
+        <br>
+
+        <label for="authKey">
+          <span class="required">*</span> 인증번호
+        </label>
+        <div class="signUp-input-area">
+          <input type="text" name="authKey" id="authKey" placeholder="인증번호 입력" maxlength="6" autocomplete="off">
+          <button id="checkAuthKeyBtn" type="button">인증하기</button>
+        </div>
+        <span class="signUp-message" id="authKeyMessage"></span>
+
+        <!-- <div id="findIdResult"
+          style="display: none; margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px; text-align: center;">
+          <p style="margin-bottom: 10px;">회원님의 아이디는 <strong id="discoveredId" style="color: #007bff;"></strong> 입니다.</p>
+          <button type="button" onclick="location.href='/member/login'" class="login-btn"
+            style="width: 100%; background-color: #333; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">로그인하러
+            가기</button>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="button" onclick="history.back()"
+            style="flex: 1; background-color: #ccc; border: none; color: white; padding: 13px; border-radius: 4px; cursor: pointer;">이전으로</button>
+          <button type="button" id="findIdBtn" style="flex: 2; display: none;">아이디 확인</button>
+        </div> -->
+
+      </form>
+    </section>
+  </main>
+
+  <th:block th:replace="~{common/footer}"></th:block>
+
+  <script src="/js/member/findId.js"></script>
+</body>
+
+</html>
