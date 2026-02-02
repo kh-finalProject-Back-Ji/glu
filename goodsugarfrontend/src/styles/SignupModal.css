@@ -2,21 +2,7 @@
    Signup Modal (theme: #F0E68C)
    =============================== */
 
-.signup-modal-container {
-  background-color: #ffffff;
-  width: 440px;
-  min-height: 640px;
-  border: 1px solid #cccccc;
-  border-radius: 20px;
-  padding: 22px 22px 20px;
-  position: fixed;
-  z-index: 100;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-weight: 600;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-}
+
 
 /* 제목 */
 .signup-title {
@@ -39,6 +25,9 @@
 .signup-form {
   display: grid;
   gap: 10px;
+  max-height: 500px; /* 스크롤 높이 */
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 /* 입력 공통 */

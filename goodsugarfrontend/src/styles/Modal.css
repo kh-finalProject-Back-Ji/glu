@@ -18,16 +18,16 @@
 
 /* ✅ 실무 모달 크기/비율 */
 .dm-panel{
-  width: min(820px, 92vw);
+  width: min(440px, 92vw);
   max-height: min(80vh, 780px);
   overflow: auto;
-
   border-radius: 22px;
   background: #fff;
   box-shadow: var(--shadow);
   border: 2px solid rgba(240,230,140,0.75);
   padding: 22px 22px 18px;
   position: relative;
+
 }
 
 /* 닫기 버튼 */
@@ -43,6 +43,7 @@
   cursor:pointer;
   font-size: 26px;
   line-height: 1;
+
 }
 
 /* 헤더 */
@@ -165,8 +166,4 @@
   max-height: 88vh;
   padding: 18px 18px 16px;
 }
-.dm-panel--sm{
-  width: min(520px, 92vw);
-  max-height: 88vh;
-  padding: 18px 18px 16px;
-}
+
