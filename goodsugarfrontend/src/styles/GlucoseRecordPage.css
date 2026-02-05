@@ -1,0 +1,88 @@
+/* 페이지 레이아웃 (이미 있으면 유지해도 됨) */
+.gr-page{
+  display:flex;
+  gap:16px;
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+/* 왼쪽 캘린더 카드 */
+.gr-left{
+  flex: 1;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  padding: 14px 14px 18px;
+  box-sizing: border-box;
+
+  /* ✅ 아래가 잘리는 문제 방지 */
+  overflow: visible;
+  height: auto;
+  min-height: 0;
+}
+
+/* 오른쪽 패널 */
+.gr-right{
+  width: 520px; /* 너 스샷 느낌 */
+  min-width: 420px;
+}
+
+/* =========================
+   ✅ 캘린더 상단 헤더(완전 고정판)
+========================= */
+.gr-calHeader{
+  position: relative;      /* ✅ 화살표 absolute 기준 */
+  height: 56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom: 10px;
+}
+
+/* ✅ 화살표: 캘린더 카드의 끝으로 고정 */
+.gr-calArrow{
+  position: absolute;
+  top: 6px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e2d76d;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 900;
+  line-height: 44px;
+  text-align: center;
+  user-select: none;
+}
+
+.gr-calArrow-left{ left: 0; }
+.gr-calArrow-right{ right: 0; }
+
+.gr-calArrow:hover{
+  background:#F0E68C;
+}
+
+/* ✅ "혈당 기록" - RightPanel 톤으로 조화롭게 */
+.gr-calTitle{
+  font-family: var(--font-main);
+  font-size: 26px;         /* 너무 튀면 24로 */
+  font-weight: 800;        /* 900 말고 800이 카드랑 잘 어울림 */
+  letter-spacing: -0.01em; /* ✅ 로고 느낌 제거 */
+  color: #111;             /* ✅ RightPanel처럼 기본은 검정 */
+}
+
+/* ✅ 월 텍스트는 타이틀 아래/옆이 아니라 '상단 우측'에 보이게 */
+.gr-calMonthText{
+  position: absolute;
+  right: 60px;             /* 화살표(44px)+여백 만큼 */
+  top: 18px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 800;
+  color: #222;
+}
+
+/* 만약 "혈당 기록"만 핑크로 하고 싶으면 이 옵션만 켜 */
+.gr-calTitle.is-pink{
+  color: #e84c7a;
+}

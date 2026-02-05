@@ -1,0 +1,149 @@
+/* 헤더는 다른 CSS 영향 받지 않게 전부 gs- prefix 사용 */
+.gs-header{
+  height: 72px;
+  background: #F0E68C;       /* ✅ 너 테마색 */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* 로고 영역 */
+.gs-brand{
+  display:flex;
+  align-items:center;
+  text-decoration:none;
+}
+
+/* ✅ 로고가 화면 덮는거 방지: 폭/높이 강제 고정 */
+.gs-brandLogo{
+  height: 44px;
+  width: 44px;               /* 로고가 크면 여기만 키워 */
+  object-fit: contain;
+  display:block;
+}
+
+/* 네비게이션 */
+.gs-nav{
+  display:flex;
+  align-items:flex-start;
+  gap: 16px;
+}
+
+/* 메뉴 1칸 */
+.gs-navItem{
+  width: 56px;               /* 아이콘 메뉴 폭 통일 */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* 아이콘 버튼/링크 */
+.gs-profileBtn,
+.gs-iconLink{
+  width: 32px;
+  height: 32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  background:transparent;
+  padding:0;
+  cursor:pointer;
+  text-decoration:none;
+}
+
+/* ✅ 아이콘 크기 고정 */
+.gs-icon{
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display:block;
+}
+
+/* 라벨(글자) */
+.gs-labelRow{
+  height: 14px;             /* ✅ 글자 기준선 통일 */
+  display:flex;
+  align-items:center;
+  margin-top: 4px;
+}
+
+.gs-label{
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* 프로필 드롭다운 기준점 */
+.gs-profileItem{
+  position: relative;
+}
+
+/* 드롭다운 */
+.gs-dropdown{
+  position:absolute;
+  top: 52px;
+  right: 0;
+  width: 220px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 8px;
+  z-index: 1000;
+}
+
+.gs-ddItem{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align:left;
+}
+
+.gs-ddItem:hover{
+  background: rgba(0,0,0,0.06);
+}
+
+.gs-ddIcon{
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display:block;
+}
+
+.gs-ddDivider{
+  height:1px;
+  background: rgba(0,0,0,0.12);
+  margin: 8px 0;
+}
+
+.gs-ddLogout span{
+  color:#d33;
+  font-weight:600;
+}
+/* ✅ 헤더 중앙 타이틀 영역 */
+.gs-center{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events: none;  /* 클릭 방해 X */
+}
+
+
+.gs-centerTitle{
+  font-family: var(--font-main);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #e84c7a;}

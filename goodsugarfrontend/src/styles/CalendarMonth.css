@@ -1,0 +1,137 @@
+.cal-wrap{
+  width:100%;
+}
+
+/* 요일 */
+.cal-week{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.cal-weekcell{
+  text-align:center;
+  font-weight:1000;
+  font-size:12px;
+  color:#666;
+  padding:6px 0;
+}
+
+/* ✅ 날짜 그리드: 행 수는 자동으로 늘어나게 */
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:12px;
+
+  /* ✅ 핵심: 행 높이만 고정. 행 개수는 cells 개수로 자동 생성됨 */
+  grid-auto-rows: clamp(115px, 10.5vw, 170px);
+}
+
+/* 날짜 셀 */
+.cal-cell{
+  position:relative;
+  display:block;               /* 전역 button flex 영향 방지 */
+  text-align:left;
+
+  border:1px solid #e6e6e6;
+  border-radius:16px;
+  background:#fafafa;
+
+  padding: 34px 12px 12px;
+  cursor:pointer;
+
+  transition: background 0.12s, transform 0.06s, border-color 0.12s, box-shadow 0.12s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+
+  appearance:none;
+  outline:none;
+}
+
+.cal-cell:hover{
+  background:#F0E68C;
+  border-color:#e2d76d;
+}
+
+.cal-cell:active{
+  transform:scale(0.99);
+}
+
+.cal-cell.empty{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  cursor:default;
+  padding:0;
+}
+
+/* 날짜 숫자 맨 위 중앙 */
+.cal-day{
+  position:absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  margin:0;
+  padding:0;
+  font-weight:1000;
+  font-size:16px;
+  color:#222;
+  line-height:1;
+}
+
+/* 공복 뱃지 우측 상단 */
+.cal-fasting{
+  position:absolute;
+  top: 0;
+  right: 0;
+  font-weight:1000;
+  font-size:12px;
+  color:#6a5e00;
+  background: rgba(240,230,140,0.45);
+  border: 1px solid #e2d76d;
+  padding:4px 10px;
+  border-radius:999px;
+  line-height:1;
+}
+
+/* 내용 영역 */
+.cal-body{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.cal-icons{
+  font-size:18px;
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  min-height:26px;
+  align-content:flex-start;
+}
+
+.cal-count{
+  font-size:12px;
+  font-weight:900;
+  color:#444;
+}
+
+/* 상태 */
+.cal-cell.has{
+  background:#fff;
+}
+
+.cal-cell.is-today{
+  outline: 2px solid rgba(240,230,140,0.9);
+  outline-offset: 0px;
+}
+
+.cal-cell.is-selected{
+  background: rgba(240,230,140,0.65);
+  border-color:#e2d76d;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+}
+
+.cal-cell.is-selected:hover{
+  background: rgba(240,230,140,0.70);
+}

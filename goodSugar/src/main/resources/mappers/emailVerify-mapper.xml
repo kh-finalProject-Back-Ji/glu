@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.kh.goodsugar.member.model.mapper.EmailVerifyMapper">
+
+  <update id="upsertCode">
+    MERGE INTO EMAIL_VERIFY t
+    USING (SELECT #{email} AS EMAIL FROM dual) s
+    ON (t.EMAIL = s.EMAIL AND t.VERIFIED_AT IS NULL)
+    WHEN MATCHED THEN UPDATE SET
+      t.VERIFY_CODE = #{code},
+      t.EXPIRED_AT  = SYSTIMESTAMP + NUMTODSINTERVAL(#{expiredAtMinutes}, 'MINUTE'),
+      t.MEMBER_ID   = NULL
+    WHEN NOT MATCHED THEN INSERT (
+      VERIFY_ID, MEMBER_ID, EMAIL, VERIFY_CODE, EXPIRED_AT, VERIFIED_AT
+    ) VALUES (
+      SEQ_EMAIL_VERIFY.NEXTVAL,
+      NULL,
+      #{email},
+      #{code},
+      SYSTIMESTAMP + NUMTODSINTERVAL(#{expiredAtMinutes}, 'MINUTE'),
+      NULL
+    )
+  </update>
+
+  <update id="verify">
+    UPDATE EMAIL_VERIFY
+    SET VERIFIED_AT = SYSTIMESTAMP
+    WHERE EMAIL = #{email}
+      AND VERIFY_CODE = #{code}
+      AND VERIFIED_AT IS NULL
+      AND EXPIRED_AT >= SYSTIMESTAMP
+  </update>
+
+  <select id="isVerifiedValid" resultType="int">
+    SELECT CASE WHEN EXISTS (
+      SELECT 1
+      FROM EMAIL_VERIFY
+      WHERE EMAIL = #{email}
+        AND VERIFIED_AT IS NOT NULL
+        AND EXPIRED_AT >= SYSTIMESTAMP
+    ) THEN 1 ELSE 0 END
+    FROM dual
+  </select>
+
+</mapper>
+
