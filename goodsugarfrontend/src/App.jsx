@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
+import Board from "./pages/Board";
 
 import Home from "./pages/Home";
 import GlucoseRecordPage from "./pages/GlucoseRecordPage";
@@ -32,6 +33,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/glucose" element={<GlucoseRecordPage />} />
+            <Route path="/board" element={<Board />} />
 
             {/* ✅ 여기서 setAccessToken을 실제로 내려줌 */}
             <Route
