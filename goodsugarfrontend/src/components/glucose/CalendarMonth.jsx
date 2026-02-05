@@ -2,34 +2,43 @@ import { dayOfWeek0Sun, endOfMonth, startOfMonth, toISODate } from "../../utils/
 import "../../styles/CalendarMonth.css";
 import CalendarCell from "./CalendarCell";
 
-const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
+const WEEK = ["일","월","화","수","목","금","토"];
 
 export default function CalendarMonth({
   monthDate,
   days,
+  onClickDay,
   selectedISO,
-  memberId,
-
-  onOpenDay,  // (iso)
-  onCreate,   // (iso)
-  onEditDay,  // (iso)
+  onCreate = () => {},
+  onDetail = () => {},
+  onEdit = () => {},
+  onDelete = () => {},
 }) {
   const s = startOfMonth(monthDate);
   const e = endOfMonth(monthDate);
 
+  // 📌 날짜별 summary 맵 (캘린더 집계 데이터)
   const summaryMap = new Map();
   (days || []).forEach((d) => {
     summaryMap.set(String(d.measureDate), d);
   });
 
-  const firstDow = dayOfWeek0Sun(s);
+  const firstDow = dayOfWeek0Sun(s); // 0=Sun
   const totalDays = e.getDate();
   const todayISO = toISODate(new Date());
 
   const cells = [];
 
-  for (let i = 0; i < firstDow; i++) cells.push({ type: "empty", key: `pre-${i}` });
+  /* =========================
+     1️⃣ 앞쪽 빈칸
+  ========================= */
+  for (let i = 0; i < firstDow; i++) {
+    cells.push({ type: "empty", key: `pre-${i}` });
+  }
 
+  /* =========================
+     2️⃣ 실제 날짜
+  ========================= */
   for (let day = 1; day <= totalDays; day++) {
     const date = new Date(s.getFullYear(), s.getMonth(), day);
     const iso = toISODate(date);
@@ -46,21 +55,33 @@ export default function CalendarMonth({
     });
   }
 
-  while (cells.length % 7 !== 0) cells.push({ type: "empty", key: `post-${cells.length}` });
+  /* =========================
+     3️⃣ 뒤쪽 빈칸 (7의 배수)
+  ========================= */
+  while (cells.length % 7 !== 0) {
+    cells.push({ type: "empty", key: `post-${cells.length}` });
+  }
+
+  /* =========================
+     4️⃣ 주(행) 수 계산 (5주 / 6주)
+  ========================= */
+  const weeks = Math.ceil(cells.length / 7);
 
   return (
     <div className="cal-wrap">
+      {/* 요일 */}
       <div className="cal-week">
         {WEEK.map((w) => (
-          <div key={w} className="cal-weekcell">
-            {w}
-          </div>
+          <div key={w} className="cal-weekcell">{w}</div>
         ))}
       </div>
 
-      <div className="cal-grid">
+      {/* 날짜 grid */}
+      <div className="cal-grid" data-weeks={weeks}>
         {cells.map((c) => {
-          if (c.type === "empty") return <div key={c.key} className="cal-cell empty" />;
+          if (c.type === "empty") {
+            return <div key={c.key} className="cal-cell empty" />;
+          }
 
           return (
             <CalendarCell
@@ -68,12 +89,14 @@ export default function CalendarMonth({
               day={c.day}
               iso={c.iso}
               summary={c.summary}
-              memberId={memberId}
               isToday={c.isToday}
               isSelected={c.isSelected}
-              onOpenDay={onOpenDay}
+
+              /* hover 액션 콜백 */
               onCreate={onCreate}
-              onEditDay={onEditDay}
+              onDetail={onDetail}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           );
         })}
