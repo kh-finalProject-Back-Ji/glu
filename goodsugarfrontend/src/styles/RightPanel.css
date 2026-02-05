@@ -1,141 +1,31 @@
-:root{
-  --pink:#e84c7a;
-  --paper:#ffffff;
-  --line:rgba(0,0,0,0.08);
-  --muted:rgba(0,0,0,0.55);
-  --soft:0 10px 26px rgba(0,0,0,0.10);
-}
-
-.rp-wrap{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
 .rp-card{
-  background:var(--paper);
-  border:1px solid var(--line);
+  background:#fff;
+  border:1px solid #ddd;
   border-radius:18px;
-  padding:14px 14px;
-  box-shadow:var(--soft);
-}
-
-.rp-focus{
-  border-color: rgba(232,76,122,0.25);
+  padding:14px;
+  box-shadow:0 3px 6px rgba(0,0,0,0.10), 0 3px 6px rgba(0,0,0,0.16);
 }
 
 .rp-title{
   font-weight:1000;
-  font-size:16px;
-  color:#111;
-  margin-bottom:8px;
-}
-
-.rp-muted{
-  font-size:12px;
-  font-weight:800;
-  color:var(--muted);
-}
-
-.rp-hint{
-  margin-top:10px;
-  font-size:12px;
-  font-weight:900;
-  color:rgba(0,0,0,0.55);
-  background:#fffdf0;
-  border:1px solid rgba(240,230,140,0.65);
-  padding:10px 12px;
-  border-radius:14px;
-}
-
-.rp-kpis{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10px;
-  margin-top:10px;
-}
-
-.rp-kpi{
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:10px 12px;
-  background:#fff;
-}
-
-.rp-kpiLabel{
-  font-size:12px;
-  font-weight:900;
-  color:var(--muted);
-}
-
-.rp-kpiValue{
-  margin-top:4px;
-  font-size:20px;
-  font-weight:1100;
-  color:#111;
-}
-
-.rp-kpiValue.fasting{
-  color:var(--pink);
-}
-
-.rp-badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:12px;
-}
-
-.rp-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:1000;
-  border:1px solid rgba(232,76,122,0.25);
-  background:#fff;
-}
-
-.rp-badgeEmoji{
-  font-size:16px;
-  line-height:1;
-}
-
-.rp-badge.off{
-  opacity:0.35;
-  border-color:rgba(0,0,0,0.10);
-}
-
-.rp-badge.on{
-  opacity:1;
-  color:var(--pink);
-}
-
-.rp-subRow{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
+  font-size:14px;
   margin-bottom:10px;
-  flex-wrap:wrap;
+  color:#333;
 }
 
-.rp-subText{
+.rp-memo-head{
   font-size:12px;
+  color:#444;
+  margin-bottom:8px;
   font-weight:900;
-  color:rgba(0,0,0,0.55);
-}
-
-.rp-avg{
-  color:var(--pink);
 }
 
 .rp-memo-box{
-  margin-top:10px;
-  border:1px solid var(--line);
+  background:#fafafa;
+  border:1px solid #eee;
   border-radius:14px;
   padding:12px;
-  background:#fff;
+  font-size:12px;
+  color:#333;
+  line-height:1.4;
 }

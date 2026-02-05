@@ -51,18 +51,3 @@ html, body, #root {
 .content {
   flex: 1;                  /* Header, Footer 제외한 나머지를 채움 */
 }
-
-
-html, body, #root{
-  height:100%;
-}
-
-.app-shell{
-  min-height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-.app-main{
-  flex:1;
-}
