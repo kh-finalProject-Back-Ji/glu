@@ -1,0 +1,53 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+:root {
+  --font-main: "Pretendard", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Apple SD Gothic Neo",
+               "Noto Sans KR", Arial, sans-serif;
+
+  --bg-page: #f8f9fa;        /* ✅ 구글 느낌 배경 톤 (여기만 변경) */
+  --bg-surface: #ffffff;
+
+  --text-strong: #111111;
+  --text: #222222;
+  --text-sub: #666666;
+  --text-muted: #999999;
+
+  --line: #e5e5e5;
+  --shadow: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.06);
+
+  /* ✅ 너 테마색은 유지(핑크/노랑) */
+  --theme-pink: #e84c7a;
+  --theme-yellow: #f4e6a8;
+  --theme-yellow-hover: #edd980;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  background: var(--bg-page);
+  color: var(--text);
+}
+
+:root{
+  --font-main: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
+}
