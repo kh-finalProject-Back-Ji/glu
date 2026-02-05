@@ -1,81 +1,79 @@
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import ModalBase from "../common/ModalBase";
 import api from "../../api/axios";
 import "../../styles/DayModal.css";
 
-/**
- * 실무형 UX 요구
- * - records 0개: [작성하기]만 크게 노출
- * - records 1개 이상: [첫번째 기록] [작성하기]
- *   - 첫번째 기록 클릭 → 아래 액션바(수정/삭제/상세) 펼쳐짐
- *   - 상세 클릭 → RecordDetailModal
- *   - 수정 클릭 → RecordFormModal(edit)
- *   - 삭제 클릭 → DELETE 후 재조회 + onSaved(캘린더 집계 reload)
- *
- * API (백엔드 기준)
- * - GET    /glucose/day?memberId=&date=YYYY-MM-DD
- * - GET    /glucose/{recordId}
- * - POST   /glucose
- * - PUT    /glucose/{recordId}
- * - DELETE /glucose/{recordId}
- */
+const MEASURE_TYPES = [
+  { value: "FASTING", label: "공복" },
+  { value: "BEFORE_MEAL", label: "식전" },
+  { value: "AFTER_1H", label: "식후 1시간" },
+  { value: "AFTER_2H", label: "식후 2시간" },
+  { value: "UNKNOWN", label: "모름" },
+];
 
-export default function DayModal({
-  open,
-  onClose,
-  memberId,
-  dateISO,
-  summary,
-  onSaved,
-}) {
+const GLUCOSE_TYPES = [
+  { value: "STEP_1", label: "1단계" },
+  { value: "STEP_1_5", label: "1.5단계" },
+  { value: "STEP_2", label: "2단계" },
+  { value: "PREV_STEP", label: "전단계" },
+  { value: "UNKNOWN", label: "모름" },
+];
+
+const rid = (r) =>
+  r?.recordId ?? r?.glucoseRecordId ?? r?.glucoseRecordNo ?? r?.id ?? null;
+
+const toHHmm = (t) => (t ? String(t).slice(0, 5) : "");
+const safeStr = (v) => (v == null ? "" : String(v));
+
+function labelMeasure(measureType) {
+  return MEASURE_TYPES.find((x) => x.value === measureType)?.label ?? "모름";
+}
+function labelGType(glucoseType) {
+  return GLUCOSE_TYPES.find((x) => x.value === glucoseType)?.label ?? "모름";
+}
+
+export default function DayModal({ open, onClose, memberId, dateISO, onSaved }) {
+  const [mode, setMode] = useState("menu"); // menu | form | detail
   const [records, setRecords] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // “첫번째 기록” 액션 펼치기
-  const [expanded, setExpanded] = useState(false);
+  const emptyForm = useMemo(
+    () => ({
+      recordId: null,
+      memberId,
+      glucoseValue: "",
+      drinkYN: false,
+      exerciseYN: false,
+      exerciseContents: "",
+      measureDate: dateISO,
+      measureTime: "",
+      measureType: "FASTING",
+      medicationYN: false,
+      medicationInfo: "",
+      injectionYN: false,
+      injectionInfo: "",
+      diet: "",
+      logContent: "",
+      glucoseType: "UNKNOWN",
+    }),
+    [memberId, dateISO]
+  );
 
-  // 2차 모달들
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [formOpen, setFormOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
 
-  // 폼 모달 모드
-  const [formMode, setFormMode] = useState("create"); // create | edit
-
-  // 상세 모달 데이터
-  const [detailRecord, setDetailRecord] = useState(null);
-
-  const hasRecord = records.length > 0;
-
-  // 첫번째 기록
-  const firstRecord = useMemo(() => (records?.length ? records[0] : null), [records]);
-  const firstRecordId = firstRecord?.recordId ?? null;
-
-  // 모달 닫기(상태 정리)
-  const closeAll = () => {
-    setExpanded(false);
-    setDetailOpen(false);
-    setFormOpen(false);
-    setDetailRecord(null);
-    setErrorMsg("");
-    onClose?.();
-  };
-
-  // ✅ 모달 열릴 때마다: records 로드 + 상태 리셋
   useEffect(() => {
     if (!open) return;
-
-    setExpanded(false);
-    setDetailOpen(false);
-    setFormOpen(false);
-    setDetailRecord(null);
-    setErrorMsg("");
-
-    fetchDayRecords().catch(console.error);
+    setMode("menu");
+    setSelectedId(null);
+    setForm(emptyForm);
+    fetchDay();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, dateISO, memberId]);
 
-  const fetchDayRecords = async () => {
+  async function fetchDay() {
     if (!memberId || !dateISO) return;
     setLoading(true);
     setErrorMsg("");
@@ -83,583 +81,451 @@ export default function DayModal({
       const res = await api.get("/glucose/day", {
         params: { memberId, date: dateISO },
       });
-      setRecords(res.data || []);
-    } catch (e) {
-      console.error("day records load fail", e);
-      setRecords([]);
-      setErrorMsg("해당 날짜 기록을 불러오지 못했어요.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 작성
-  const openCreate = () => {
-    setFormMode("create");
-    setFormOpen(true);
-  };
-
-  // 수정(첫번째)
-  const openEditFirst = () => {
-    if (!firstRecordId) return;
-    setFormMode("edit");
-    setFormOpen(true);
-  };
-
-  // 상세(첫번째)
-  const openDetailFirst = async () => {
-    if (!firstRecordId) return;
-    setLoading(true);
-    setErrorMsg("");
-    try {
-      // records에 상세 필드가 다 있으면 이 호출은 생략 가능
-      const res = await api.get(`/glucose/${firstRecordId}`);
-      setDetailRecord(res.data);
-      setDetailOpen(true);
-    } catch (e) {
-      console.error("detail load fail", e);
-      setErrorMsg("상세 조회에 실패했어요.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 삭제(첫번째)
-  const deleteFirst = async () => {
-    if (!firstRecordId) return;
-    if (!window.confirm("첫번째 기록을 삭제할까?")) return;
-
-    setLoading(true);
-    setErrorMsg("");
-    try {
-      await api.delete(`/glucose/${firstRecordId}`);
-      await fetchDayRecords();
-      await onSaved?.(); // 캘린더/우측패널 집계 리프레시
-      setExpanded(false);
-    } catch (e) {
-      console.error("delete fail", e);
-      setErrorMsg("삭제에 실패했어요.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 첫번째 기록 토글
-  const onClickFirstRecord = () => {
-    setExpanded((v) => !v);
-  };
-
-  // ESC 닫기
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => {
-      if (e.key === "Escape") closeAll();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  if (!open) return null;
-
-  return createPortal(
-    <div className="dm-backdrop" onClick={closeAll}>
-      <div className="dm-panel" onClick={(e) => e.stopPropagation()}>
-        <button className="dm-close" onClick={closeAll} type="button" aria-label="닫기">
-          ×
-        </button>
-
-        {/* ===== 헤더 ===== */}
-        <div className="dm-head">
-          <div className="dm-brand">Good Sugar</div>
-          <div className="dm-date">{dateISO}</div>
-        </div>
-
-        {/* ===== 요약 카드 ===== */}
-        <div className="dm-card">
-          <div className="dm-cardTitle">요약</div>
-
-          {loading ? (
-            <div className="dm-muted">불러오는 중...</div>
-          ) : errorMsg ? (
-            <div className="dm-muted">{errorMsg}</div>
-          ) : hasRecord ? (
-            <div className="dm-muted">기록 {records.length}개가 있어요.</div>
-          ) : (
-            <div className="dm-muted">이 날짜는 아직 기록이 없어요.</div>
-          )}
-
-          {/* summary가 있으면 짧게 보여주기 */}
-          {summary && (
-            <div style={{ marginTop: 10, color: "#666", fontWeight: 700 }}>
-              {typeof summary.glucoseValue === "number" && (
-                <span>공복 {summary.glucoseValue} · </span>
-              )}
-              <span>기록 {summary.recordCount ?? 0}개</span>
-            </div>
-          )}
-        </div>
-
-        {/* ===== 액션 영역 ===== */}
-        {!hasRecord ? (
-          <div className="dm-emptyCta">
-            <div className="dm-emptyTitle">기록이 없어요</div>
-            <div className="dm-emptyDesc">오늘의 혈당 기록을 남겨볼까요?</div>
-
-            <button
-              className="dm-btn primary big"
-              onClick={openCreate}
-              type="button"
-              disabled={loading}
-            >
-              작성하기
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="dm-topRow">
-              <button
-                className={`dm-btn ${expanded ? "active" : ""}`}
-                onClick={onClickFirstRecord}
-                type="button"
-                disabled={loading}
-                style={{ flex: 1 }}
-              >
-                첫번째 기록
-              </button>
-
-              <button
-                className="dm-btn primary"
-                onClick={openCreate}
-                type="button"
-                disabled={loading}
-                style={{ width: 160 }}
-              >
-                작성하기
-              </button>
-            </div>
-
-            {/* 펼쳐지는 액션바 */}
-            {expanded && (
-              <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-                <button
-                  className="dm-btn"
-                  onClick={openEditFirst}
-                  type="button"
-                  disabled={loading}
-                  style={{ flex: 1 }}
-                >
-                  수정
-                </button>
-                <button
-                  className="dm-btn danger"
-                  onClick={deleteFirst}
-                  type="button"
-                  disabled={loading}
-                  style={{ flex: 1 }}
-                >
-                  삭제
-                </button>
-                <button
-                  className="dm-btn"
-                  onClick={openDetailFirst}
-                  type="button"
-                  disabled={loading}
-                  style={{ flex: 1 }}
-                >
-                  상세
-                </button>
-              </div>
-            )}
-
-            {records.length > 1 && (
-              <div style={{ marginTop: 12, color: "#666", fontWeight: 700 }}>
-                ※ 이 날짜에 기록이 {records.length}개 있어요. (리스트 UI는 다음 단계에서)
-              </div>
-            )}
-          </>
-        )}
-
-        {/* ===== 2차 모달: 상세 ===== */}
-        {detailOpen && (
-          <RecordDetailModal
-            record={detailRecord}
-            onClose={() => setDetailOpen(false)}
-          />
-        )}
-
-        {/* ===== 2차 모달: 작성/수정 ===== */}
-        {formOpen && (
-          <RecordFormModal
-            mode={formMode}
-            memberId={memberId}
-            dateISO={dateISO}
-            recordId={formMode === "edit" ? firstRecordId : null}
-            initialRecord={formMode === "edit" ? firstRecord : null}
-            onClose={() => setFormOpen(false)}
-            onSuccess={async () => {
-              setFormOpen(false);
-              setExpanded(false);
-              await fetchDayRecords();
-              await onSaved?.();
-            }}
-          />
-        )}
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-/* =========================
-   상세 모달
-========================= */
-function RecordDetailModal({ record, onClose }) {
-  return createPortal(
-    <div className="dm2-backdrop" onClick={onClose}>
-      <div className="dm2-panel" onClick={(e) => e.stopPropagation()}>
-        <button className="dm2-close" onClick={onClose} type="button" aria-label="닫기">
-          ×
-        </button>
-
-        <div className="dm2-title">상세</div>
-
-        {!record ? (
-          <div className="dm-muted">상세 데이터가 없어요.</div>
-        ) : (
-          <div className="dm2-body">
-            <pre className="dm-pre">{JSON.stringify(record, null, 2)}</pre>
-          </div>
-        )}
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-/* =========================
-   작성/수정 모달 (기본 폼)
-   ✅ 백엔드 DTO 필드명에 맞춤:
-   - medicationYN 사용 (useMedicationYN 금지)
-========================= */
-function RecordFormModal({
-  mode,            // "create" | "edit"
-  memberId,
-  dateISO,
-  recordId,
-  initialRecord,
-  onClose,
-  onSuccess,
-}) {
-  const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
-  // ===== DTO 기반 =====
-  const [glucoseValue, setGlucoseValue] = useState(initialRecord?.glucoseValue ?? "");
-  const [measureTime, setMeasureTime] = useState(initialRecord?.measureTime ?? "08:00");
-  const [measureType, setMeasureType] = useState(initialRecord?.measureType ?? "FASTING");
-
-  const [exerciseYN, setExerciseYN] = useState(!!initialRecord?.exerciseYN);
-  const [exerciseContents, setExerciseContents] = useState(initialRecord?.exerciseContents ?? "");
-  const [drinkYN, setDrinkYN] = useState(!!initialRecord?.drinkYN);
-
-  const [medicationYN, setMedicationYN] = useState(!!initialRecord?.medicationYN);
-  const [medicationInfo, setMedicationInfo] = useState(initialRecord?.medicationInfo ?? "");
-
-  const [injectionYN, setInjectionYN] = useState(!!initialRecord?.injectionYN);
-  const [injectionInfo, setInjectionInfo] = useState(initialRecord?.injectionInfo ?? "");
-
-  const [diet, setDiet] = useState(initialRecord?.diet ?? "");
-  const [logContent, setLogContent] = useState(initialRecord?.logContent ?? "");
-
-  // ✅ 필수: 당뇨 타입(자유입력)
-  const [glucoseType, setGlucoseType] = useState(initialRecord?.glucoseType ?? "");
-
-  const MEASURE = [
-    ["FASTING", "공복"],
-    ["BEFORE_MEAL", "식전"],
-    ["AFTER_1H", "식후 1시간"],
-    ["AFTER_2H", "식후 2시간"],
-    ["UNKNOWN", "모름"],
-  ];
-
-  const SUGGEST_TYPES = ["1형", "2형", "1.5형", "전단계", "모름"];
-
-  // 글자 길이 제한(컬럼 VARCHAR2(20)이라 20자 권장)
-  const normalizeGlucoseType = (s) => s.replace(/\s+/g, " ").trim().slice(0, 20);
-
-  const validate = () => {
-    if (!memberId) return "memberId가 없어.";
-    if (!dateISO) return "dateISO가 없어.";
-
-    const gt = normalizeGlucoseType(glucoseType);
-    if (!gt) return "당뇨 타입(1형/2형/전단계 등)을 입력하거나 선택해야 저장돼.";
-
-    if (glucoseValue === "" || glucoseValue === null) return "혈당 값을 입력해줘.";
-    const v = Number(glucoseValue);
-    if (Number.isNaN(v)) return "혈당 값이 숫자가 아니야.";
-    if (v <= 0) return "혈당 값이 0 이하야.";
-
-    if (exerciseYN && !exerciseContents.trim()) return "운동 체크했으면 운동 내용을 적어줘.";
-    if (medicationYN && !medicationInfo.trim()) return "약 체크했으면 약 정보를 적어줘.";
-    if (injectionYN && !injectionInfo.trim()) return "주사 체크했으면 주사 정보를 적어줘.";
-
-    return "";
-  };
-
-  const canSave = (() => {
-    if (saving) return false;
-    if (!normalizeGlucoseType(glucoseType)) return false;
-    if (glucoseValue === "" || Number.isNaN(Number(glucoseValue)) || Number(glucoseValue) <= 0) return false;
-    if (exerciseYN && !exerciseContents.trim()) return false;
-    if (medicationYN && !medicationInfo.trim()) return false;
-    if (injectionYN && !injectionInfo.trim()) return false;
-    return true;
-  })();
-
-  const onSubmit = async () => {
-    const msg = validate();
-    if (msg) return setErrorMsg(msg);
-
-    const payload = {
-      memberId,
-      measureDate: dateISO,
-      measureTime,
-      measureType,
-
-      glucoseValue: Number(glucoseValue),
-
-      drinkYN,
-
-      exerciseYN,
-      exerciseContents: exerciseYN ? exerciseContents.trim() : null,
-
-      medicationYN,
-      medicationInfo: medicationYN ? medicationInfo.trim() : null,
-
-      injectionYN,
-      injectionInfo: injectionYN ? injectionInfo.trim() : null,
-
-      diet: diet.trim() ? diet.trim() : null,
-      logContent: logContent.trim() ? logContent.trim() : null,
-
-      // ✅ 필수 + 20자 제한
-      glucoseType: normalizeGlucoseType(glucoseType),
-    };
-
-    setSaving(true);
-    setErrorMsg("");
-
-    try {
-      if (mode === "create") {
-        await api.post("/glucose", payload);
-      } else {
-        await api.put(`/glucose/${recordId}`, payload);
-      }
-      await onSuccess?.();
+      const list = Array.isArray(res.data) ? res.data : [];
+      setRecords(list);
+      setSelectedId(rid(list[0]) ?? null);
     } catch (e) {
       console.error(e);
-      setErrorMsg("저장 실패(서버 로그 확인).");
+      setErrorMsg("기록을 불러오지 못했어요.");
+      setRecords([]);
+      setSelectedId(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const selected = useMemo(() => {
+    return records.find((r) => String(rid(r)) === String(selectedId)) || null;
+  }, [records, selectedId]);
+
+  const summary = useMemo(() => {
+    const count = records.length;
+    const fasting = records.find((r) => r.measureType === "FASTING")?.glucoseValue ?? null;
+    const hasDrink = records.some((r) => r.drinkYN);
+    const hasMed = records.some((r) => r.medicationYN);
+    const hasInj = records.some((r) => r.injectionYN);
+    const hasEx = records.some((r) => r.exerciseYN);
+    return { count, fasting, hasDrink, hasMed, hasInj, hasEx };
+  }, [records]);
+
+  const hasFastingAlready = useMemo(
+    () => (records || []).some((r) => r?.measureType === "FASTING"),
+    [records]
+  );
+
+  function startCreate() {
+    setErrorMsg("");
+    setForm({
+      ...emptyForm,
+      // 공복이 이미 있으면 기본 구분을 식전으로 내려서 UX 편하게
+      measureType: hasFastingAlready ? "BEFORE_MEAL" : "FASTING",
+    });
+    setMode("form");
+  }
+
+  function startEdit(r) {
+    setErrorMsg("");
+    setForm({
+      recordId: rid(r),
+      memberId: r.memberId,
+      glucoseValue: r.glucoseValue ?? "",
+      drinkYN: !!r.drinkYN,
+      exerciseYN: !!r.exerciseYN,
+      exerciseContents: safeStr(r.exerciseContents),
+      measureDate: dateISO,
+      measureTime: toHHmm(r.measureTime),
+      measureType: r.measureType ?? "UNKNOWN",
+      medicationYN: !!r.medicationYN,
+      medicationInfo: safeStr(r.medicationInfo),
+      injectionYN: !!r.injectionYN,
+      injectionInfo: safeStr(r.injectionInfo),
+      diet: safeStr(r.diet),
+      logContent: safeStr(r.logContent),
+      glucoseType: r.glucoseType ?? "UNKNOWN",
+    });
+    setMode("form");
+  }
+
+  function openDetail(r) {
+    setSelectedId(rid(r));
+    setMode("detail");
+  }
+
+  function onChange(e) {
+    const { name, value, type, checked } = e.target;
+
+    setForm((p) => {
+      if (name === "exerciseYN") {
+        return { ...p, exerciseYN: checked, exerciseContents: checked ? p.exerciseContents : "" };
+      }
+      if (name === "medicationYN") {
+        return { ...p, medicationYN: checked, medicationInfo: checked ? p.medicationInfo : "" };
+      }
+      if (name === "injectionYN") {
+        return { ...p, injectionYN: checked, injectionInfo: checked ? p.injectionInfo : "" };
+      }
+      return { ...p, [name]: type === "checkbox" ? checked : value };
+    });
+  }
+
+  function normalizePayload(f) {
+    return {
+      recordId: f.recordId || null,
+      memberId: f.memberId,
+      glucoseValue: f.glucoseValue === "" ? null : Number(f.glucoseValue),
+
+      drinkYN: !!f.drinkYN,
+      exerciseYN: !!f.exerciseYN,
+      exerciseContents: f.exerciseYN ? (f.exerciseContents?.trim() || null) : null,
+
+      measureDate: f.measureDate,
+      measureTime: f.measureTime?.trim() ? f.measureTime : null,
+      measureType: f.measureType,
+
+      medicationYN: !!f.medicationYN,
+      medicationInfo: f.medicationYN ? (f.medicationInfo?.trim() || null) : null,
+
+      injectionYN: !!f.injectionYN,
+      injectionInfo: f.injectionYN ? (f.injectionInfo?.trim() || null) : null,
+
+      diet: f.diet?.trim() || null,
+      logContent: f.logContent?.trim() || null,
+
+      glucoseType: f.glucoseType?.trim() || "UNKNOWN",
+    };
+  }
+
+  async function removeRecord(id) {
+    if (!id) return;
+    if (!window.confirm("삭제할까요?")) return;
+
+    setErrorMsg("");
+    try {
+      await api.delete(`/glucose/${id}`);
+      await fetchDay();
+      onSaved?.();
+    } catch (e) {
+      console.error(e);
+      setErrorMsg("삭제에 실패했어요.");
+    }
+  }
+
+  async function submit(e) {
+    e.preventDefault();
+    if (saving) return;
+
+    setErrorMsg("");
+
+    // ✅ 공복 하루 1회 제한 (신규 작성일 때만)
+    if (!form.recordId && form.measureType === "FASTING" && hasFastingAlready) {
+      setErrorMsg("공복은 하루에 1번만 입력할 수 있어요.");
+      return;
+    }
+
+    if (!form.measureDate) {
+      setErrorMsg("날짜가 비어있어요.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = normalizePayload(form);
+
+      if (form.recordId) {
+        await api.put(`/glucose/${form.recordId}`, payload);
+      } else {
+        await api.post("/glucose", payload);
+      }
+
+      await fetchDay();
+      onSaved?.();
+      setMode("menu");
+    } catch (e2) {
+      console.error(e2);
+      setErrorMsg("저장/수정 실패.");
     } finally {
       setSaving(false);
     }
-  };
+  }
 
-  return createPortal(
-    <div className="gs2-backdrop" onClick={onClose}>
-      <div className="gs2-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="gs2-head">
-          <div className="gs2-title">
-            {mode === "create" ? "혈당 기록 작성" : "혈당 기록 수정"}
-            <div className="gs2-sub">{dateISO}</div>
-          </div>
-          <button className="gs2-x" onClick={onClose} type="button" aria-label="닫기">×</button>
-        </div>
-
-        {errorMsg && <div className="gs2-error">{errorMsg}</div>}
-
-        {/* ✅ 필수: 당뇨 타입 */}
-        <section className="gs2-card gs2-cardRequired">
-          <div className="gs2-cardTitle">
-            ✅ 당뇨 타입(자유 입력) <span className="gs2-required">*</span>
-          </div>
-
-          <div className="gs2-field">
-            <label>예: 1형 / 2형 / 1.5형 / 전단계 / 모름</label>
-            <input
-              value={glucoseType}
-              onChange={(e) => setGlucoseType(e.target.value)}
-              placeholder="모르면 '모름' 누르기"
-              className={!normalizeGlucoseType(glucoseType) ? "gs2-invalid" : ""}
-              maxLength={20}
-            />
-
-            <div className="gs2-chipRow">
-              {SUGGEST_TYPES.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`gs2-chip ${normalizeGlucoseType(glucoseType) === t ? "on" : ""}`}
-                  onClick={() => setGlucoseType(t)}
-                  disabled={saving}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-
-            {!normalizeGlucoseType(glucoseType) && (
-              <div className="gs2-help danger">
-                이 값은 필수야. 모르면 <b>모름</b> 누르면 돼.
-              </div>
-            )}
-
-            <div className="gs2-help">
-              최대 20자. (DB 컬럼 VARCHAR2(20))
-            </div>
-          </div>
-        </section>
-
-        {/* 🩸 혈당 */}
-        <section className="gs2-card">
-          <div className="gs2-cardTitle">🩸 혈당</div>
-
-          <div className="gs2-grid2">
-            <div className="gs2-field">
-              <label>혈당 값 (mg/dL)</label>
-              <input
-                type="number"
-                value={glucoseValue}
-                onChange={(e) => setGlucoseValue(e.target.value)}
-                placeholder="예: 95"
-                className={(glucoseValue === "" || Number(glucoseValue) <= 0) ? "gs2-invalid" : ""}
-              />
-            </div>
-
-            <div className="gs2-field">
-              <label>측정 시간</label>
-              <input
-                type="time"
-                value={measureTime}
-                onChange={(e) => setMeasureTime(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="gs2-field" style={{ marginTop: 12 }}>
-            <label>측정 유형 (MeasureType)</label>
-            <div className="gs2-pillRow">
-              {MEASURE.map(([val, label]) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={`gs2-pill ${measureType === val ? "on" : ""}`}
-                  onClick={() => setMeasureType(val)}
-                  disabled={saving}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 🏃 생활 */}
-        <section className="gs2-card">
-          <div className="gs2-cardTitle">🏃 생활</div>
-
-          <div className="gs2-toggleGrid">
-            <Toggle label="운동" checked={exerciseYN} onChange={setExerciseYN} disabled={saving} />
-            <Toggle label="음주" checked={drinkYN} onChange={setDrinkYN} disabled={saving} />
-            <Toggle label="약" checked={medicationYN} onChange={setMedicationYN} disabled={saving} />
-            <Toggle label="주사" checked={injectionYN} onChange={setInjectionYN} disabled={saving} />
-          </div>
-
-          <div className={`gs2-reveal ${exerciseYN ? "open" : ""}`}>
-            <div className="gs2-field" style={{ marginTop: 12 }}>
-              <label>운동 내용 <span className="gs2-required">*</span></label>
-              <textarea
-                value={exerciseContents}
-                onChange={(e) => setExerciseContents(e.target.value)}
-                placeholder="예: 30분 걷기"
-                className={exerciseYN && !exerciseContents.trim() ? "gs2-invalid" : ""}
-              />
-            </div>
-          </div>
-
-          <div className={`gs2-reveal ${medicationYN ? "open" : ""}`}>
-            <div className="gs2-field" style={{ marginTop: 12 }}>
-              <label>약 정보 <span className="gs2-required">*</span></label>
-              <input
-                value={medicationInfo}
-                onChange={(e) => setMedicationInfo(e.target.value)}
-                placeholder="예: 메트포르민 1정"
-                className={medicationYN && !medicationInfo.trim() ? "gs2-invalid" : ""}
-              />
-            </div>
-          </div>
-
-          <div className={`gs2-reveal ${injectionYN ? "open" : ""}`}>
-            <div className="gs2-field" style={{ marginTop: 12 }}>
-              <label>주사 정보 <span className="gs2-required">*</span></label>
-              <input
-                value={injectionInfo}
-                onChange={(e) => setInjectionInfo(e.target.value)}
-                placeholder="예: 인슐린 6U"
-                className={injectionYN && !injectionInfo.trim() ? "gs2-invalid" : ""}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* 🍽 식단 */}
-        <section className="gs2-card">
-          <div className="gs2-cardTitle">🍽 식단</div>
-          <div className="gs2-field">
-            <label>식단 메모</label>
-            <textarea
-              value={diet}
-              onChange={(e) => setDiet(e.target.value)}
-              placeholder="예: 현미밥/계란/샐러드"
-            />
-          </div>
-        </section>
-
-        {/* 📝 메모 */}
-        <section className="gs2-card">
-          <div className="gs2-cardTitle">📝 하루 기록</div>
-          <div className="gs2-field">
-            <label>메모</label>
-            <textarea
-              value={logContent}
-              onChange={(e) => setLogContent(e.target.value)}
-              placeholder="예: 컨디션, 스트레스, 특이사항"
-            />
-          </div>
-        </section>
-
-        <div className="gs2-foot">
-          <button className="gs2-btn" onClick={onClose} type="button" disabled={saving}>취소</button>
-          <button className="gs2-btn primary" onClick={onSubmit} type="button" disabled={!canSave}>
-            {saving ? "저장중..." : "저장"}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-function Toggle({ label, checked, onChange, disabled }) {
   return (
-    <button
-      type="button"
-      className={`gs2-toggle ${checked ? "on" : ""}`}
-      onClick={() => onChange(!checked)}
-      disabled={disabled}
-    >
-      <span className="gs2-toggleDot" />
-      <span className="gs2-toggleLabel">{label}</span>
-    </button>
+    <ModalBase open={open} onClose={onClose}>
+      <div className="dm-wrap" role="dialog" aria-modal="true">
+        <header className="dm-head">
+          <div>
+            <div className="dm-title">Good Sugar</div>
+            <div className="dm-sub">선택 날짜: {dateISO}</div>
+          </div>
+          <button className="dm-x" onClick={onClose} aria-label="닫기" type="button">
+            ✕
+          </button>
+        </header>
+
+        {errorMsg && <div className="dm-alert">{errorMsg}</div>}
+
+        {mode === "menu" && (
+          <>
+            <section className="dm-summary">
+              <div className="dm-summaryTop">
+                <div className="dm-summaryLeft">
+                  <div className="dm-summaryTitle">요약</div>
+                  <div className="dm-summaryMeta">
+                    {loading ? "불러오는 중..." : `오늘 기록 ${summary.count}개`}
+                    <span className="dm-dot">·</span>
+                    공복 <b className="dm-fast">{summary.fasting ?? "-"}</b>
+                  </div>
+                </div>
+
+                <button className="dm-primary" onClick={startCreate} type="button">
+                  작성하기
+                </button>
+              </div>
+
+              <div className="dm-badges">
+                <span className={`dm-badge ${summary.hasEx ? "on" : ""}`}>🏃 운동</span>
+                <span className={`dm-badge ${summary.hasDrink ? "on" : ""}`}>🍺 음주</span>
+                <span className={`dm-badge ${summary.hasMed ? "on" : ""}`}>💊 약</span>
+                <span className={`dm-badge ${summary.hasInj ? "on" : ""}`}>💉 주사</span>
+              </div>
+            </section>
+
+            <section className="dm-list">
+              {records.length === 0 ? (
+                <div className="dm-empty">아직 기록이 없어요. “작성하기”로 추가해봐.</div>
+              ) : (
+                <ul className="dm-ul">
+                  {records.map((r, idx) => {
+                    const id = rid(r);
+
+                    return (
+                      <li key={id ? `rid-${id}` : `idx-${idx}`} className="dm-item">
+                        <button
+                          className="dm-itemMain"
+                          type="button"
+                          onClick={() => openDetail(r)}
+                        >
+                          <div className="dm-row1">
+                            <span className="dm-no">#{idx + 1}</span>
+                            <span className="dm-time">{toHHmm(r.measureTime) || "시간없음"}</span>
+                          </div>
+
+                          <div className="dm-row2">
+                            <span className="dm-pill">혈당 {r.glucoseValue ?? "-"}</span>
+                            <span className="dm-pill">{labelMeasure(r.measureType)}</span>
+                            <span className="dm-pill">{labelGType(r.glucoseType)}</span>
+                          </div>
+
+                          <div className="dm-row3">
+                            {(r.exerciseYN ? "🏃" : "")}
+                            {(r.drinkYN ? " 🍺" : "")}
+                            {(r.medicationYN ? " 💊" : "")}
+                            {(r.injectionYN ? " 💉" : "")}
+                          </div>
+                        </button>
+
+                        <div className="dm-actions">
+                          <button className="dm-ghost" type="button" onClick={() => startEdit(r)}>
+                            수정
+                          </button>
+                          <button className="dm-ghost danger" type="button" onClick={() => removeRecord(id)}>
+                            삭제
+                          </button>
+                          <button className="dm-ghost" type="button" onClick={() => openDetail(r)}>
+                            상세
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+          </>
+        )}
+
+        {mode === "detail" && selected && (
+          <section className="dm-detail">
+            <div className="dm-detailTop">
+              <div className="dm-detailTitle">상세</div>
+              <div className="dm-detailBtns">
+                <button className="dm-ghost" type="button" onClick={() => startEdit(selected)}>
+                  수정
+                </button>
+                <button
+                  className="dm-ghost danger"
+                  type="button"
+                  onClick={() => removeRecord(rid(selected))}
+                >
+                  삭제
+                </button>
+                <button className="dm-ghost" type="button" onClick={() => setMode("menu")}>
+                  목록
+                </button>
+              </div>
+            </div>
+
+            <div className="dm-grid">
+              <div className="dm-card">
+                <div className="dm-cardT">기본</div>
+                <div className="dm-row"><span>시간</span><b>{toHHmm(selected.measureTime) || "-"}</b></div>
+                <div className="dm-row"><span>혈당</span><b>{selected.glucoseValue ?? "-"}</b></div>
+                <div className="dm-row"><span>구분</span><b>{labelMeasure(selected.measureType)}</b></div>
+                <div className="dm-row"><span>타입</span><b>{labelGType(selected.glucoseType)}</b></div>
+              </div>
+
+              <div className="dm-card">
+                <div className="dm-cardT">생활</div>
+                <div className="dm-row"><span>음주</span><b>{selected.drinkYN ? "Y" : "N"}</b></div>
+                <div className="dm-row"><span>운동</span><b>{selected.exerciseYN ? "Y" : "N"}</b></div>
+                <div className="dm-row"><span>운동내용</span><b>{selected.exerciseContents || "-"}</b></div>
+                <div className="dm-row"><span>식단</span><b>{selected.diet || "-"}</b></div>
+              </div>
+
+              <div className="dm-card">
+                <div className="dm-cardT">약/주사</div>
+                <div className="dm-row"><span>약</span><b>{selected.medicationYN ? "Y" : "N"}</b></div>
+                <div className="dm-row"><span>약 정보</span><b>{selected.medicationInfo || "-"}</b></div>
+                <div className="dm-row"><span>주사</span><b>{selected.injectionYN ? "Y" : "N"}</b></div>
+                <div className="dm-row"><span>주사 정보</span><b>{selected.injectionInfo || "-"}</b></div>
+              </div>
+
+              <div className="dm-card full">
+                <div className="dm-cardT">메모</div>
+                <div className="dm-memo">{selected.logContent || "메모 없음"}</div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {mode === "form" && (
+          <form className="dm-form" onSubmit={submit}>
+            <div className="dm-formTop">
+              <div className="dm-formTitle">{form.recordId ? "기록 수정" : "기록 작성"}</div>
+              <div className="dm-formBtns">
+                <button type="button" className="dm-ghost" onClick={() => setMode("menu")} disabled={saving}>
+                  취소
+                </button>
+                <button type="submit" className="dm-primary" disabled={saving}>
+                  {saving ? "저장중..." : "저장하기"}
+                </button>
+              </div>
+            </div>
+
+            <div className="dm-formGrid">
+              <label className="dm-field">
+                <span>혈당</span>
+                <input
+                  name="glucoseValue"
+                  value={form.glucoseValue}
+                  onChange={onChange}
+                  placeholder="예: 110"
+                  inputMode="numeric"
+                />
+              </label>
+
+              <label className="dm-field">
+                <span>측정 구분</span>
+                <select name="measureType" value={form.measureType} onChange={onChange}>
+                  {MEASURE_TYPES.map((t) => (
+                    <option
+                      key={t.value}
+                      value={t.value}
+                      disabled={!form.recordId && t.value === "FASTING" && hasFastingAlready}
+                    >
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="dm-field">
+                <span>시간(선택)</span>
+                <input name="measureTime" type="time" value={form.measureTime} onChange={onChange} />
+              </label>
+
+              <label className="dm-field">
+                <span>혈당 타입(필수)</span>
+                <select name="glucoseType" value={form.glucoseType} onChange={onChange} required>
+                  {GLUCOSE_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="dm-switchRow">
+                <label className="dm-switch">
+                  <input type="checkbox" name="drinkYN" checked={form.drinkYN} onChange={onChange} />
+                  <span>🍺 음주</span>
+                </label>
+
+                <label className="dm-switch">
+                  <input type="checkbox" name="exerciseYN" checked={form.exerciseYN} onChange={onChange} />
+                  <span>🏃 운동</span>
+                </label>
+
+                <label className="dm-switch">
+                  <input type="checkbox" name="medicationYN" checked={form.medicationYN} onChange={onChange} />
+                  <span>💊 약</span>
+                </label>
+
+                <label className="dm-switch">
+                  <input type="checkbox" name="injectionYN" checked={form.injectionYN} onChange={onChange} />
+                  <span>💉 주사</span>
+                </label>
+              </div>
+
+              <label className={`dm-field ${!form.exerciseYN ? "disabled" : ""}`}>
+                <span>운동 내용(선택)</span>
+                <input
+                  name="exerciseContents"
+                  value={form.exerciseContents}
+                  onChange={onChange}
+                  placeholder="안 써도 됨"
+                  disabled={!form.exerciseYN}
+                />
+              </label>
+
+              <label className={`dm-field ${!form.medicationYN ? "disabled" : ""}`}>
+                <span>약 정보(선택)</span>
+                <input
+                  name="medicationInfo"
+                  value={form.medicationInfo}
+                  onChange={onChange}
+                  placeholder="안 써도 됨"
+                  disabled={!form.medicationYN}
+                />
+              </label>
+
+              <label className={`dm-field ${!form.injectionYN ? "disabled" : ""}`}>
+                <span>주사 정보(선택)</span>
+                <input
+                  name="injectionInfo"
+                  value={form.injectionInfo}
+                  onChange={onChange}
+                  placeholder="안 써도 됨"
+                  disabled={!form.injectionYN}
+                />
+              </label>
+
+              <label className="dm-field full">
+                <span>식단(선택)</span>
+                <input name="diet" value={form.diet} onChange={onChange} placeholder="예: 샐러드/밥/빵..." />
+              </label>
+
+              <label className="dm-field full">
+                <span>메모(선택)</span>
+                <textarea
+                  name="logContent"
+                  value={form.logContent}
+                  onChange={onChange}
+                  placeholder="오늘 컨디션/특이사항 등"
+                  rows={4}
+                />
+              </label>
+            </div>
+          </form>
+        )}
+      </div>
+    </ModalBase>
   );
 }

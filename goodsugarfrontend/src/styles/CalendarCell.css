@@ -1,0 +1,133 @@
+.cal-cell{
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  padding: 10px;
+  min-height: 84px;
+  background: #fff;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.cal-cell:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+}
+
+.cal-cell.today{
+  border-color: rgba(232,76,122,0.35);
+}
+
+.cal-cell.selected{
+  outline: 2px solid rgba(232,76,122,0.35);
+}
+
+.cal-day{
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.cal-count{
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+}
+
+.cal-fasting{
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: rgba(240,230,140,0.60);
+}
+
+.cal-emo{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-size: 14px;
+}
+
+/* hover panel */
+.cal-hover{
+  position: absolute;
+  top: 40px;
+  left: 8px;
+  right: 8px;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+  padding: 10px;
+}
+
+.cal-hoverTop{
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.cal-create{
+  background: #e84c7a;
+  color: #fff;
+  border: none;
+  font-weight: 900;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.cal-muted{ opacity: .65; font-size: 12px; }
+
+.cal-recordRow{
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.03);
+  margin-bottom: 8px;
+}
+
+.cal-rowBtns{
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.cal-act{
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.cal-act.danger{
+  border-color: rgba(232,76,122,0.35);
+  color: #e84c7a;
+}
+.cal-hover{
+  border: 0 !important;              /* ✅ 흰 테두리 제거 */
+  box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* 작성하기 버튼: 테두리/아웃라인 제거 + 핑크 */
+.cal-create{
+  background:#e84c7a;
+  color:#fff;
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+  border-radius:12px;
+  padding:8px 12px;
+}
+.cal-create:hover{ filter: brightness(.95); }
