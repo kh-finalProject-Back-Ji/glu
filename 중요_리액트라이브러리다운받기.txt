@@ -1,0 +1,7 @@
+npm i axios
+npm install react-router-dom
+
+
+밑에는 아직 안씀
+npm install @mui/material @emotion/react @emotion/styled
+npm install @mui/icons-material
