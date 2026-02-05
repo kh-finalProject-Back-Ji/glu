@@ -1,103 +1,90 @@
+// src/components/glucose/charts/Fasting3MonthsChart.jsx
 import { useMemo } from "react";
 
-// days에서 공복혈당 값 뽑아오기 (필드명 여러 케이스 대응)
-function pickFastingValue(d) {
-  const v =
-    d.fastingGlucose ??
-    d.fasting ??
-    d.fastingLevel ??
-    d.fastingSugar ??
-    d.fasting_value ??
-    d.fasting_glucose ??
-    null;
-
-  const num = Number(v);
-  return Number.isFinite(num) ? num : null;
+function toNum(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }
 
-// measureDate(또는 date)에서 yyyy-mm 뽑기
-function pickYYYYMM(d) {
-  const raw = d.measureDate ?? d.date ?? d.recordDate ?? d.measuredAt ?? d.createdAt ?? "";
-  if (typeof raw === "string" && raw.length >= 7) return raw.slice(0, 7);
-  // Date 객체 가능성
-  if (raw instanceof Date) {
-    const yyyy = raw.getFullYear();
-    const mm = String(raw.getMonth() + 1).padStart(2, "0");
-    return `${yyyy}-${mm}`;
-  }
-  return "unknown";
-}
-
-function round1(n) {
-  return Math.round(n * 10) / 10;
+function toISO(d) {
+  return String(d?.measureDate ?? "");
 }
 
 export default function Fasting3MonthsChart({ days = [] }) {
-  const stats = useMemo(() => {
-    // 월별로 fasting 값 모으기
-    const byMonth = new Map();
+  const points = useMemo(() => {
+    // 날짜순 정렬
+    const sorted = [...(days || [])].sort((a, b) => toISO(a).localeCompare(toISO(b)));
 
-    for (const d of days || []) {
-      const ym = pickYYYYMM(d);
-      const val = pickFastingValue(d);
-      if (val == null) continue;
+    // 공복 값 있는 데이터만
+    const list = sorted
+      .map((d) => {
+        const v = toNum(d.fastingValue ?? d.fastingAvg);
+        return { xKey: toISO(d), v };
+      })
+      .filter((p) => p.xKey && p.v !== null);
 
-      if (!byMonth.has(ym)) byMonth.set(ym, []);
-      byMonth.get(ym).push(val);
-    }
-
-    // 정렬된 월 리스트
-    const months = Array.from(byMonth.keys()).sort();
-
-    // 최근 3개만
-    const last3 = months.slice(-3);
-
-    const rows = last3.map((m) => {
-      const arr = byMonth.get(m) || [];
-      const sum = arr.reduce((a, b) => a + b, 0);
-      const avg = arr.length ? sum / arr.length : null;
-      const min = arr.length ? Math.min(...arr) : null;
-      const max = arr.length ? Math.max(...arr) : null;
-      return { month: m, count: arr.length, avg, min, max };
-    });
-
-    // bar 스케일용 최대 avg
-    const maxAvg = Math.max(
-      1,
-      ...rows.map((r) => (r.avg == null ? 0 : r.avg))
-    );
-
-    return { rows, maxAvg };
+    return list;
   }, [days]);
 
-  if (!stats.rows.length) {
-    return <div className="rp-muted">공복 혈당 데이터가 없어요.</div>;
+  if (!points || points.length === 0) {
+    return <div style={{ fontSize: 12, fontWeight: 800, color: "rgba(0,0,0,0.55)" }}>공복 혈당 데이터가 없어요.</div>;
   }
 
-  return (
-    <div className="rp-chart">
-      <div className="rp-chart-grid">
-        {stats.rows.map((r) => {
-          const pct = r.avg == null ? 0 : Math.round((r.avg / stats.maxAvg) * 100);
-          return (
-            <div key={r.month} className="rp-row">
-              <div className="rp-row-head">
-                <span className="rp-k">{r.month}</span>
-                <span className="rp-v">
-                  평균 <b>{r.avg == null ? "-" : round1(r.avg)}</b> / 최소 {r.min ?? "-"} / 최대 {r.max ?? "-"} ({r.count}건)
-                </span>
-              </div>
+  const W = 360;
+  const H = 160;
+  const PAD = 18;
 
-              <div className="rp-bar-rail">
-                <div className="rp-bar" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          );
-        })}
+  const minV = Math.min(...points.map((p) => p.v));
+  const maxV = Math.max(...points.map((p) => p.v));
+  const span = Math.max(1, maxV - minV);
+
+  const xStep = points.length === 1 ? 0 : (W - PAD * 2) / (points.length - 1);
+
+  const coords = points.map((p, i) => {
+    const x = PAD + i * xStep;
+    const y = PAD + (H - PAD * 2) * (1 - (p.v - minV) / span);
+    return { ...p, x, y };
+  });
+
+  const dPath = coords
+    .map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(2)} ${c.y.toFixed(2)}`)
+    .join(" ");
+
+  const last = coords[coords.length - 1];
+
+  return (
+    <div style={{ width: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "#111" }}>
+          최근 공복: <span style={{ color: "#e84c7a" }}>{last.v}</span>
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 800, color: "rgba(0,0,0,0.55)" }}>
+          min {minV} / max {maxV}
+        </div>
       </div>
 
-      <div className="rp-muted" style={{ marginTop: 8 }}>
-        ※ 막대는 최근 3개월 평균을 상대 비교한 표시입니다.
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="160" style={{ display: "block" }}>
+        {/* grid line */}
+        <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="rgba(0,0,0,0.08)" />
+        <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="rgba(0,0,0,0.08)" />
+
+        {/* path */}
+        <path d={dPath} fill="none" stroke="rgba(232,76,122,0.9)" strokeWidth="2.5" />
+
+        {/* points */}
+        {coords.map((c) => (
+          <circle key={c.xKey} cx={c.x} cy={c.y} r="3.5" fill="rgba(240,230,140,1)" stroke="rgba(232,76,122,0.9)" />
+        ))}
+
+        {/* last label */}
+        <text x={last.x} y={Math.max(12, last.y - 10)} textAnchor="middle" fontSize="10" fontWeight="900" fill="rgba(0,0,0,0.65)">
+          {last.v}
+        </text>
+      </svg>
+
+      <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(0,0,0,0.55)", marginTop: 6 }}>
+        공복 데이터 있는 날만 표시됩니다.
       </div>
     </div>
   );

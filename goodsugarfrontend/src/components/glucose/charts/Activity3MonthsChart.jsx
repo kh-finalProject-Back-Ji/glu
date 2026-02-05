@@ -1,92 +1,87 @@
+// src/components/glucose/charts/Activity3MonthsChart.jsx
 import { useMemo } from "react";
 
-function pickYYYYMM(d) {
-  const raw = d.measureDate ?? d.date ?? d.recordDate ?? d.measuredAt ?? d.createdAt ?? "";
-  if (typeof raw === "string" && raw.length >= 7) return raw.slice(0, 7);
-  if (raw instanceof Date) {
-    const yyyy = raw.getFullYear();
-    const mm = String(raw.getMonth() + 1).padStart(2, "0");
-    return `${yyyy}-${mm}`;
-  }
-  return "unknown";
-}
-
-function pickBool(d, keys) {
-  for (const k of keys) {
-    if (k in d) {
-      const v = d[k];
-      if (typeof v === "boolean") return v;
-      if (typeof v === "number") return v === 1;
-      if (typeof v === "string") {
-        const s = v.trim().toUpperCase();
-        if (s === "Y" || s === "TRUE" || s === "1") return true;
-        if (s === "N" || s === "FALSE" || s === "0") return false;
-      }
-    }
-  }
-  return false;
+function bool(v) {
+  return v === true || v === 1 || v === "Y";
 }
 
 export default function Activity3MonthsChart({ days = [] }) {
-  const rows = useMemo(() => {
-    const byMonth = new Map();
+  const stats = useMemo(() => {
+    const list = days || [];
+    const drink = list.filter((d) => bool(d.drinkYN)).length;
+    const exercise = list.filter((d) => bool(d.exerciseYN)).length;
+    const medication = list.filter((d) => bool(d.medicationYN)).length;
+    const injection = list.filter((d) => bool(d.injectionYN)).length;
+    const recordedDays = list.filter((d) => (d.recordCount ?? 0) > 0).length;
+    const totalRecords = list.reduce((acc, d) => acc + Number(d.recordCount ?? 0), 0);
 
-    for (const d of days || []) {
-      const ym = pickYYYYMM(d);
-
-      const exercised = pickBool(d, ["exercise", "didExercise", "workout", "exerciseYn", "exerciseYN"]);
-      const drank = pickBool(d, ["alcohol", "drink", "drank", "alcoholYn", "alcoholYN"]);
-      const tookMed = pickBool(d, ["medicine", "med", "tookMedicine", "medicineYn", "medicineYN"]);
-      const injected = pickBool(d, ["injection", "shot", "insulin", "injectionYn", "injectionYN"]);
-
-      if (!byMonth.has(ym)) {
-        byMonth.set(ym, { month: ym, exerciseDays: 0, alcoholDays: 0, medDays: 0, injectionDays: 0, total: 0 });
-      }
-
-      const agg = byMonth.get(ym);
-      agg.total += 1;
-      if (exercised) agg.exerciseDays += 1;
-      if (drank) agg.alcoholDays += 1;
-      if (tookMed) agg.medDays += 1;
-      if (injected) agg.injectionDays += 1;
-    }
-
-    const months = Array.from(byMonth.keys()).sort();
-    return months.slice(-3).map((m) => byMonth.get(m));
+    return { drink, exercise, medication, injection, recordedDays, totalRecords };
   }, [days]);
 
-  if (!rows.length) {
-    return <div className="rp-muted">활동 데이터가 없어요.</div>;
-  }
+  const items = [
+    { emoji: "🍺", label: "음주", value: stats.drink },
+    { emoji: "🏃", label: "운동", value: stats.exercise },
+    { emoji: "💊", label: "약", value: stats.medication },
+    { emoji: "💉", label: "주사", value: stats.injection },
+  ];
 
   return (
-    <div className="rp-chart">
-      <table className="rp-table">
-        <thead>
-          <tr>
-            <th>월</th>
-            <th>운동</th>
-            <th>음주</th>
-            <th>약</th>
-            <th>주사</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.month}>
-              <td>{r.month}</td>
-              <td>{r.exerciseDays}</td>
-              <td>{r.alcoholDays}</td>
-              <td>{r.medDays}</td>
-              <td>{r.injectionDays}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={boxStyle}>
+          <div style={kStyle}>기록 있는 날짜</div>
+          <div style={vStyle}>{stats.recordedDays}일</div>
+        </div>
+        <div style={boxStyle}>
+          <div style={kStyle}>총 기록 수</div>
+          <div style={vStyle}>{stats.totalRecords}개</div>
+        </div>
+      </div>
 
-      <div className="rp-muted" style={{ marginTop: 8 }}>
-        ※ 각 항목은 “해당 기록 중 체크된 날 수” 집계입니다.
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+        {items.map((it) => (
+          <div key={it.label} style={pillStyle}>
+            <span style={{ fontSize: 18 }}>{it.emoji}</span>
+            <span style={{ fontWeight: 1000 }}>{it.label}</span>
+            <b style={{ marginLeft: "auto" }}>{it.value}</b>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(0,0,0,0.55)", marginTop: 8 }}>
+        “활동”은 3개월 집계(days)에서 해당 플래그가 1인 날짜 수로 계산합니다.
       </div>
     </div>
   );
 }
+
+const boxStyle = {
+  border: "1px solid rgba(0,0,0,0.08)",
+  borderRadius: 14,
+  padding: "10px 12px",
+  background: "#fff",
+};
+
+const kStyle = {
+  fontSize: 12,
+  fontWeight: 900,
+  color: "rgba(0,0,0,0.55)",
+};
+
+const vStyle = {
+  marginTop: 4,
+  fontSize: 18,
+  fontWeight: 1000,
+  color: "#111",
+};
+
+const pillStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  borderRadius: 14,
+  border: "1px solid rgba(0,0,0,0.08)",
+  background: "#fffdf0",
+  padding: "10px 12px",
+  fontSize: 13,
+};
