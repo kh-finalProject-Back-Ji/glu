@@ -35,11 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
-<<<<<<< HEAD
 /.metadata/
 
 
 # secrets / local config
 goodSugar/src/main/resources/config.properties
-=======
->>>>>>> 142485dbd7e9925c1d14f4b254e5b539cbeaf68d
