@@ -1,0 +1,12 @@
+npm install 
+npm install axios
+npm install react-router-dom
+npm install react-tabs
+npm i recharts
+npm install lucide-react
+npm i recharts
+
+-- 미정
+$ npm install immutability-helper --save
+$ npm install reactstrap --save
+$ npm install bootstrap --save

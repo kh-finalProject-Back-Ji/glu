@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, MessageCircle, Filter } from 'lucide-react';
 import '../styles/Board.css';
 import { Tabs, Tab, TabList, TabPanel } from 'react-tabs';
+import axios from 'axios';
 
 const Board = () => {
   const [boardButton, setBoardButton] = useState('snack');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedStatus, setSelectedStatus] = useState('전체');
+  const [boardList, setBoardList] = useState([]);
 
   const categories = ['전체', '아이스크림', '음료', '과자', '빵', '과일', '기타'];
   const statuses = ['전체', '먹고 싶다', '먹음'];
+
+  useEffect(() => {
+    const fetchAllBoards = async () => {
+      try {
+        // 경로에서 typeId 제거
+        const response = await axios.get('http://localhost:12345/board');
+        setBoardList(response.data);
+      } catch (error) {
+        console.error("데이터를 가져오는데 실패했습니다:", error);
+      }
+    };
+    fetchAllBoards();
+  }, []);
 
   const posts = [
     {
@@ -76,7 +91,10 @@ const Board = () => {
     ));
   };
 
+
+
   return (
+    
     <div className="board">
       <div className="container">
         <Tabs>
@@ -245,19 +263,46 @@ const Board = () => {
             </div>
 
           </TabPanel>
-          <TabPanel>
-            <div className="board-content">
-              <div className="content-header">
-                <h2 className="page-title">자유 게시판</h2>
-                <div className="action-buttons">
-                  <button className="action-button create-button">
-                    게시글 작성
-                  </button>
-                </div>
-              </div>
+         <TabPanel>
+          
+  <div className="board-content">
+    <div className="content-header">
+      <h2 className="page-title">자유 게시판</h2>
+      <div className="action-buttons">
+        <button className="action-button create-button">게시글 작성</button>
+      </div>
+    </div>
+                
+    <div className="posts-grid">
+      {/* 데이터가 없을 경우를 대비한 처리 */}
+      {boardList && boardList.length > 0 ? (
+        boardList.map((post) => (
+          <div key={post.boardId} className="post-card">
+            <div className="post-header">
+              <h3 className="post-title">{post.boardTitle}</h3>
             </div>
-
-          </TabPanel>
+            
+            <p className="post-date">📅 {post.boardCreate}</p>
+            
+            {/* 필드명 확인: boardContents (s 포함여부 확인!) */}
+            <p className="post-content">{post.boardContents || post.boardContent}</p>
+            
+            <div className="post-footer">
+              <p className="post-writer">
+                {/* 닉네임 필드명도 DTO에 따라 확인 필요 (nickname인지?) */}
+                작성자: {post.IS_ANONYMOUS_YN === 'N' ? post.NICKNAME : (post.ANONYMOUS_NAME || '익명')}
+                
+              </p>
+              <span>조회수: {post.boardViewCount}</span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="no-data">게시글이 없습니다.</p>
+      )}
+    </div>
+  </div>
+</TabPanel>
           <TabPanel>
             <div className="board-content">
               <div className="content-header">

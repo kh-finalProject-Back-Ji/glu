@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.kh.goodsugar.board.model.mapper.BoardMapper">
+
+   <select id="selectBoardList" resultType="edu.kh.goodsugar.board.model.dto.Board">
+    SELECT 
+        BOARD_ID,
+        BOARD_TITLE,
+        BOARD_CONTENT,
+        BOARD_VIEW_COUNT,
+        BOARD_DELETED_FL,
+        BOARD_CREATE,
+        IS_ANONYMOUS_YN,
+        ANONYMOUS_NAME,
+        MEMBER_ID,
+        NICKNAME
+    FROM BOARD JOIN MEMBER USING(MEMBER_ID)
+    WHERE BOARD_DELETED_FL = 'N'
+    ORDER BY BOARD_ID DESC
+   </select>
+   
+</mapper>
