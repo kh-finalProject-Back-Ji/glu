@@ -7,5 +7,7 @@ import edu.kh.goodsugar.board.model.dto.Board;
 public interface BoardService {
 
 	List<Board> selectBoardList();
+	
+	List<Board> selectSnackList();
 
 }

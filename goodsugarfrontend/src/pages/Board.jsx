@@ -16,7 +16,6 @@ const Board = () => {
   useEffect(() => {
     const fetchAllBoards = async () => {
       try {
-        // 경로에서 typeId 제거
         const response = await axios.get('http://localhost:12345/board');
         setBoardList(response.data);
       } catch (error) {
@@ -94,28 +93,28 @@ const Board = () => {
 
 
   return (
-    
+
     <div className="board">
       <div className="container">
         <Tabs>
           <TabList className="board-tablist">
             <Tab>
-              <button  onClick={() => setBoardButton('snack')} className={`board-button ${boardButton === 'snack' ? 'board-button-active' : ''}`}>
-                🍪 간식 게시판 
+              <button onClick={() => setBoardButton('snack')} className={`board-button ${boardButton === 'snack' ? 'board-button-active' : ''}`}>
+                🍪 간식 게시판
               </button>
             </Tab>
             <Tab>
-              <button  onClick={() => setBoardButton('free')} className={`board-button ${boardButton === 'free' ? 'board-button-active' : ''}`}>
+              <button onClick={() => setBoardButton('free')} className={`board-button ${boardButton === 'free' ? 'board-button-active' : ''}`}>
                 💬 자유 게시판
               </button>
             </Tab>
             <Tab>
-              <button  onClick={() => setBoardButton('good')} className={`board-button ${boardButton === 'good' ? 'board-button-active' : ''}`}>
+              <button onClick={() => setBoardButton('good')} className={`board-button ${boardButton === 'good' ? 'board-button-active' : ''}`}>
                 😋 당뇨식 추천 게시판
               </button>
             </Tab>
           </TabList>
-          
+
           <TabPanel>
             <div className="board-content">
               <div className="content-header">
@@ -135,21 +134,6 @@ const Board = () => {
                 </div>
 
                 <div className="filter-grid">
-                  <div className="filter-group">
-                    <p className="filter-label">카테고리</p>
-                    <div className="filter-options">
-                      {categories.map(cat => (
-                        <button
-                          key={cat}
-                          onClick={() => setSelectedCategory(cat)}
-                          className={`filter-chip ${selectedCategory === cat ? 'filter-chip-active' : ''}`}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   <div className="filter-group">
                     <p className="filter-label">상태</p>
                     <div className="filter-options">
@@ -256,6 +240,7 @@ const Board = () => {
                       <p className="post-writer">
                         작성자: {post.writer || post.allergyInfo}
                       </p>
+
                     </div>
                   </div>
                 ))}
@@ -263,46 +248,44 @@ const Board = () => {
             </div>
 
           </TabPanel>
-         <TabPanel>
-          
-  <div className="board-content">
-    <div className="content-header">
-      <h2 className="page-title">자유 게시판</h2>
-      <div className="action-buttons">
-        <button className="action-button create-button">게시글 작성</button>
-      </div>
-    </div>
-                
-    <div className="posts-grid">
-      {/* 데이터가 없을 경우를 대비한 처리 */}
-      {boardList && boardList.length > 0 ? (
-        boardList.map((post) => (
-          <div key={post.boardId} className="post-card">
-            <div className="post-header">
-              <h3 className="post-title">{post.boardTitle}</h3>
+          <TabPanel>
+
+            <div className="board-content">
+              <div className="content-header">
+                <h2 className="page-title">자유 게시판</h2>
+                <div className="action-buttons">
+                  <button className="action-button create-button">게시글 작성</button>
+                </div>
+              </div>
+
+              <div className="posts-grid">
+                {/* 데이터가 없을 경우를 대비한 처리 */}
+                {boardList && boardList.length > 0 ? (
+                  boardList.map((post) => (
+                    <div key={post.boardId} className="post-card">
+                      <div className="post-header">
+                        <h3 className="post-title">{post.boardTitle}</h3>
+                        <span>조회수: {post.boardViewCount}</span>
+                      </div>
+
+                      <p className="post-date">📅 {post.boardCreate}</p>
+
+
+                      <p className="post-content">{post.boardContents || post.boardContent}</p>
+
+                      <div className="post-footer">
+                        <p className="post-writer">
+                          작성자: {post.isAnonymousYn === 'Y' ? '익명' : post.nickname}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-data">게시글이 없습니다.</p>
+                )}
+              </div>
             </div>
-            
-            <p className="post-date">📅 {post.boardCreate}</p>
-            
-            {/* 필드명 확인: boardContents (s 포함여부 확인!) */}
-            <p className="post-content">{post.boardContents || post.boardContent}</p>
-            
-            <div className="post-footer">
-              <p className="post-writer">
-                {/* 닉네임 필드명도 DTO에 따라 확인 필요 (nickname인지?) */}
-                작성자: {post.IS_ANONYMOUS_YN === 'N' ? post.NICKNAME : (post.ANONYMOUS_NAME || '익명')}
-                
-              </p>
-              <span>조회수: {post.boardViewCount}</span>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="no-data">게시글이 없습니다.</p>
-      )}
-    </div>
-  </div>
-</TabPanel>
+          </TabPanel>
           <TabPanel>
             <div className="board-content">
               <div className="content-header">

@@ -48,7 +48,10 @@ public class SecurityConfig {
                         "/api/foods/**",
 
                         // ✅ 너가 통째로 열어둔 경로
-                        "/member/**"
+                        "/member/**",
+                        
+                        // 게시판 경로 추가
+                        "/board/**"
                 ).permitAll()
                 .anyRequest().authenticated()
         );

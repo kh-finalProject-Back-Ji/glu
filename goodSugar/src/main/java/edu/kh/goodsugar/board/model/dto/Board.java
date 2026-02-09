@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 public class Board {
 	
 	/** 게시글 번호 (PK) */
-	
     private int boardId;
 
     /** 게시글 제목 */
@@ -33,15 +32,41 @@ public class Board {
     private String boardUpdate;
     
     /** 익명 여부 */
-    private String IsAnonymousYn;
+    private String isAnonymousYn;
     
     /** 익명 이름 */
-    private String AnonymousName;
+    private String anonymousName;
 
     /** 게시판 타입 번호 */
     private int boardTypeId;
 
     /** 작성자 회원 번호 */
-    private int memberNo;
+    private int memberId;
+    
+    /** 닉네임 */
+    private String nickname;
+    
+    // SNACK 테이블
+    
+    /** 게시글 번호(PK) */
+    private int snackId;
+    
+    /** 먹은 량(ml) */
+    private String details;
+    
+    /** 1시간 이후 혈당 */
+    private int bloodSugarF;
+    
+    /** 2시간 이후 혈당 */
+    private int bloodSugarS;
+    
+    /** 공복 혈당 */
+    private int fastingGlu;
+    
+    /** 운동 여부 */
+    private String exer;
+    
+    /** 맛 평가 */
+    private int tasterating;
 
 }

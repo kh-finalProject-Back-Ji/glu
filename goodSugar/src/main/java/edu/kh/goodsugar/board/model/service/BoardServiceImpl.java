@@ -21,4 +21,9 @@ public class BoardServiceImpl implements BoardService {
 		return mapper.selectBoardList();
 	}
 
+	@Override
+	public List<Board> selectSnackList() {
+		return mapper.selectSnackList();
+	}
+
 }

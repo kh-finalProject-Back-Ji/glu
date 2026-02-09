@@ -55,6 +55,8 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
                 "providerId"
         );
     }
+    
+    
 
     public MemberInfo upsertFromOAuth(OAuthProfile profile) {
 
@@ -62,6 +64,7 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
 
         Member found = memberMapper.selectByOAuth(providerUpper, profile.providerId());
         if (found != null) {
+
             memberMapper.updateLastLogin(found.getMemberId());
             return new MemberInfo(found.getMemberId(), found.getEmail());
         }

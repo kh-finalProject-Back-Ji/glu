@@ -21,7 +21,12 @@ public class BoardController {
 	private final BoardService service;
 	
 	@GetMapping("")
-    public List<Board> selectBoardList() {
-        return service.selectBoardList();
+    public List<Board> selectBoardList(@RequestParam(value="type", required=false) String type) {
+        if("snack".equals(type)) return service.selectSnackList();
+        //if("good".equals(type)) return service.selectGoodList();
+		return service.selectBoardList();
+        
     }
+	
+	
 }
