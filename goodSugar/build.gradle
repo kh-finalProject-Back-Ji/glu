@@ -33,13 +33,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // ✅ OAuth2 Client
+    // �쐟 OAuth2 Client
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // ✅ JWT (정상 좌표)
+    // �쐟 JWT (�젙�긽 醫뚰몴)
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
@@ -60,4 +61,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-

@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
 
+import Board from "./pages/Board";
 import Home from "./pages/Home";
 import GlucoseRecordPage from "./pages/GlucoseRecordPage";
 import OAuthRedirect from "./pages/auth/OAuthRedirect";
-import Board from "./pages/Board";
+import FoodSearchPage from "./pages/FoodSearchPage";
 
 function App() {
   // ✅ 로그인 상태의 기준이 되는 accessToken
@@ -34,6 +35,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/glucose" element={<GlucoseRecordPage />} />
             <Route path="/board" element={<Board />} />
+            <Route path="/food" element={<FoodSearchPage />} />
 
             {/* ✅ 여기서 setAccessToken을 실제로 내려줌 */}
             <Route

@@ -1,15 +1,14 @@
 package edu.kh.goodsugar.glucoseRecord.model.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import edu.kh.goodsugar.glucoseRecord.model.enums.MeasureType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -25,10 +24,7 @@ public class GlucoseRecord {
     private Boolean exerciseYN;
     private String exerciseContents;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate measureDate;
-    
-    @JsonFormat(pattern = "HH:mm")
     private LocalTime measureTime;        // ✅ 그대로 유지 (TypeHandler로 처리)
 
     private MeasureType measureType;      // ✅ enum으로 고정(FASTING/BEFORE_MEAL/AFTER_1H/AFTER_2H/UNKNOWN)

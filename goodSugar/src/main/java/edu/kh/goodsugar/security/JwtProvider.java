@@ -19,26 +19,25 @@ public class JwtProvider {
 
     private final SecretKey key;
 
-    @Value("${app.jwt.issuer}")
+    @Value("${app.jwt.issuer:goodsugar}")
     private String issuer;
 
-    @Value("${app.jwt.access-minutes}")
+    @Value("${app.jwt.access-minutes:15}")
     private long accessMinutes;
 
-    @Value("${app.jwt.refresh-days}")
+    @Value("${app.jwt.refresh-days:14}")
     private long refreshDays;
 
+    // ✅ secret이 비어있으면 앱이 죽지 않게 방어 + 개발용 랜덤키 생성
+    // - 운영에서는 반드시 app.jwt.secret(또는 JWT_SECRET 환경변수)을 넣는 걸 권장
     public JwtProvider(@Value("${app.jwt.secret:}") String secret) {
-
-        // ✅ secret이 없으면 (개발용) 랜덤 키 생성
         if (secret == null || secret.isBlank()) {
-            SecretKey generated = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
-            this.key = generated;
-
-            // 개발 편의: 재시작하면 바뀌니 "로그인 풀림" 주의
-            String base64 = java.util.Base64.getEncoder().encodeToString(generated.getEncoded());
-            System.out.println("[DEV] JWT secret is not set. Generated new secret (Base64): " + base64);
+            // HS256에 안전한 키(>=256bit) 자동 생성
+            this.key = Jwts.SIG.HS256.key().build();
+            System.out.println("[JWT] app.jwt.secret is empty -> generated random key (dev only). " +
+                               "Restart will invalidate existing tokens.");
         } else {
+            // HS256 최소 32바이트 이상 필요(짧으면 WeakKeyException 발생)
             this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }
     }
@@ -79,4 +78,3 @@ public class JwtProvider {
                 .getPayload();
     }
 }
-

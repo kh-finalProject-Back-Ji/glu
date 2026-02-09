@@ -56,17 +56,10 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
         );
     }
 
-    /**
-     * ✅ OAuth 로그인/가입 통합 처리
-     * - 식별은 (provider + providerId)로만
-     * - 이메일은 있으면 사용, 없으면 fake email 발급
-     * - 닉네임은 외부 제공 nickname 무시하고 "임시 닉네임"만 발급 (충돌 방지)
-     */
     public MemberInfo upsertFromOAuth(OAuthProfile profile) {
 
         String providerUpper = profile.provider().toUpperCase(Locale.ROOT);
 
-        // 1) 이미 가입된 OAuth 회원이면 그대로 로그인 처리
         Member found = memberMapper.selectByOAuth(providerUpper, profile.providerId());
         if (found != null) {
             memberMapper.updateLastLogin(found.getMemberId());
@@ -75,23 +68,21 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
 
         OAuthProvider providerEnum = OAuthProvider.valueOf(providerUpper);
 
-        // 2) EMAIL: 카카오 등 null 가능 + DB NOT NULL 대응
+        // ✅ EMAIL: 카카오 등 null 가능 + DB는 NOT NULL
         String email = profile.email();
         if (email == null || email.isBlank()) {
+            // provider+uid 기반으로 “유니크한 가짜 이메일” 생성
             email = providerUpper.toLowerCase(Locale.ROOT) + "_" + shortUid(profile.providerId()) + "@no-email.local";
         } else {
-            // 같은 이메일이 이미 존재하면 충돌 가능 → fake email로 회피
+            // 혹시 같은 이메일이 이미 LOCAL 회원으로 존재하면 충돌 가능 → fallback
             if (memberMapper.existsEmail(email) > 0) {
                 email = providerUpper.toLowerCase(Locale.ROOT) + "_" + shortUid(profile.providerId()) + "@no-email.local";
             }
         }
 
-        // 3) NICKNAME: 외부 nickname은 무시하고 임시 닉네임 발급 (충돌 방지)
-        // 예: kakao_1234abcd / naver_88aa11bb
-        String baseTempNick = providerEnum.name().toLowerCase(Locale.ROOT) + "_" + shortUid(profile.providerId());
-        String nickname = makeUniqueNickname(providerEnum, profile.providerId(), baseTempNick);
+        // ✅ NICKNAME: null/빈값이면 생성 + UNIQUE 보장
+        String nickname = makeUniqueNickname(providerEnum, profile.providerId(), profile.nickname());
 
-        // 4) 신규 회원 INSERT
         Member m = new Member();
         m.setEmail(email);
         m.setNickname(nickname);
@@ -102,38 +93,37 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
         m.setOauthProvider(providerEnum);
         m.setOauthUid(profile.providerId());
 
-        // name도 임시 닉네임으로 통일 (외부 값 저장 안 함)
-        m.setName(nickname);
+        // name 없으면 nickname로 대체
+        m.setName((profile.nickname() != null && !profile.nickname().isBlank()) ? profile.nickname() : nickname);
 
         m.setStatus(MemberStatus.ACTIVE);
         m.setRole(MemberRole.USER);
 
         memberMapper.insertOAuthMember(m);
 
-        // insertOAuthMember에서 selectKey로 memberId가 채워지는 구조여야 함
+        // ✅ 너 XML이 selectKey로 memberId 채우는 구조면 여기서 m.getMemberId()가 채워져야 정상
+        // (안 채워지면 insertOAuthMember xml에 selectKey 확인)
         return new MemberInfo(m.getMemberId(), m.getEmail());
     }
 
-    /**
-     * ✅ 닉네임을 DB에서 UNIQUE하게 보장
-     * - candidate가 이미 있으면 뒤에 랜덤 suffix 붙임
-     */
-    private String makeUniqueNickname(OAuthProvider provider, String oauthUid, String baseCandidate) {
+    private String makeUniqueNickname(OAuthProvider provider, String oauthUid, String nickFromProvider) {
 
-        String base = normalize(baseCandidate);
+        String base;
+        if (nickFromProvider != null && !nickFromProvider.isBlank()) {
+            base = normalize(nickFromProvider);
+        } else {
+            base = provider.name().toLowerCase(Locale.ROOT) + "_" + shortUid(oauthUid);
+        }
 
         if (base.length() < 3) base = "user_" + randomSuffix(6);
         if (base.length() > 20) base = base.substring(0, 20);
 
         String candidate = base;
         int guard = 0;
-
         while (memberMapper.existsNickname(candidate) > 0) {
             guard++;
             candidate = base + "_" + randomSuffix(4);
-
             if (candidate.length() > 50) candidate = candidate.substring(0, 50);
-
             if (guard > 50) {
                 candidate = provider.name().toLowerCase(Locale.ROOT) + "_" + randomSuffix(10);
                 break;
@@ -143,8 +133,6 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
     }
 
     private String normalize(String raw) {
-        if (raw == null) return "user_" + randomSuffix(6);
-
         String s = raw.trim().toLowerCase(Locale.ROOT);
         s = s.replaceAll("[^a-z0-9_]", "_");
         s = s.replaceAll("_+", "_");
@@ -166,4 +154,3 @@ public class OAuthMemberService extends DefaultOAuth2UserService {
         return sb.toString();
     }
 }
-

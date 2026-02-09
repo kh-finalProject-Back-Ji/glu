@@ -31,6 +31,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String uri = request.getRequestURI();
+
+        // ✅ 공개 API는 JWT 검사 스킵 (검색/상세)
+        if (uri.startsWith("/api/foods")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String auth = request.getHeader("Authorization");
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);
@@ -45,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                String memberId = claims.getSubject(); // createAccessToken에서 memberId를 subject로 넣었지
+                String memberId = claims.getSubject(); // createAccessToken에서 memberId를 subject로 넣었다고 가정
                 if (memberId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                     var authToken = new UsernamePasswordAuthenticationToken(
@@ -57,11 +65,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception ignore) {
-                // 토큰 깨졌으면 그냥 인증 없이 통과 -> Security가 401 처리
+                // 토큰 파싱 실패 시 그냥 통과 -> 이후 Security가 401 처리
             }
         }
 
         filterChain.doFilter(request, response);
     }
 }
-
