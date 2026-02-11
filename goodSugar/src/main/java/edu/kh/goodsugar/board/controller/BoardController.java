@@ -28,5 +28,11 @@ public class BoardController {
         
     }
 	
+	@PostMapping("")
+	public int insertBoard(@RequestBody Board board) {
+	    if(board.getMemberId() == 0) board.setMemberId(1); 
+	    
+	    return service.insertBoard(board);
+	}
 	
 }

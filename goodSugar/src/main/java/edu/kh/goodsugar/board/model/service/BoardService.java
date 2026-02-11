@@ -10,4 +10,8 @@ public interface BoardService {
 	
 	List<Board> selectSnackList();
 
+	int insertBoard(Board board);
+	
+	int insertSnack(Board board);
+
 }

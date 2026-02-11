@@ -4,46 +4,94 @@
 <mapper namespace="edu.kh.goodsugar.board.model.mapper.BoardMapper">
 
    <select id="selectBoardList" resultType="edu.kh.goodsugar.board.model.dto.Board">
-    	SELECT 
-	        BOARD_ID          AS boardId,
-	        BOARD_TITLE       AS boardTitle,
-	        BOARD_CONTENT     AS boardContent,
-	        BOARD_VIEW_COUNT  AS boardViewCount,
-	        BOARD_DELETED_FL  AS boardDeletedFl,
-	        BOARD_CREATE      AS boardCreate,
-	        IS_ANONYMOUS_YN   AS isAnonymousYn,
-	        ANONYMOUS_NAME    AS anonymousName,
-	        MEMBER_ID         AS memberId,
-	        NICKNAME          
-	    FROM BOARD 
-	    JOIN MEMBER USING(MEMBER_ID)
-	    WHERE BOARD_DELETED_FL = 'N'
-	    ORDER BY BOARD_ID DESC
-	</select>
+    SELECT 
+        B.BOARD_ID          AS boardId,
+        B.BOARD_TITLE       AS boardTitle,
+        B.BOARD_CONTENT     AS boardContent,
+        B.BOARD_VIEW_COUNT  AS boardViewCount,
+        B.BOARD_CREATE      AS boardCreate,
+        B.BOARD_TYPE_ID     AS boardTypeId,
+        B.IS_ANONYMOUS_YN   AS isAnonymousYn,
+        M.NICKNAME,
+        S.SNACK_ID          AS snackId,
+        S.DETAILS,
+        S.BLOOD_SUGAR_F     AS bloodSugarF,
+        S.BLOOD_SUGAR_S     AS bloodSugarS,
+        S.FASTING_GLU       AS fastingGlu,
+        S.EXER,
+        S.TASTERATING
+    FROM "BOARD" B
+    JOIN "MEMBER" M ON (B.MEMBER_ID = M.MEMBER_ID)
+    LEFT JOIN "SNACK" S ON (B.BOARD_ID = S.BOARD_ID) -- 간식 정보가 있으면 가져오고 없으면 NULL
+    WHERE B.BOARD_DELETED_FL = 'N'
+    ORDER BY B.BOARD_ID DESC
+</select>
 
-	<select id="selectSnackList" resultType="edu.kh.goodsugar.board.model.dto.Board">
-		SELECT
-			B.BOARD_TITLE,
-			B.BOARD_CONTENT,
-			B.BOARD_VIEW_COUNT,
-			B.BOARD_DELETED_FL,
-			B.BOARD_CREATE,
-			B.BOARD_UPDATE,
-			B.IS_ANONYMOUS_YN,
-			S.SNACK_ID,
-			S.DETAILS,
-			S.BLOOD_SUGAR_F,
-			S.BLOOD_SUGAR_S,
-			S.FASTING_GLU,
-			S.EXER,
-			S.TASTERATING
-		FROM "BOARD" B
-		JOIN "SNACK" S ON (B.MEMBER_ID = S.MEMBER_ID)
-		WHERE B.BOARD_DELETED_FL = 'N'
-		AND B.BOARD_TYPE_ID = 2
-		ORDER BY S.SNACK_ID DESC
-	</select>
+    <select id="selectSnackList" resultType="edu.kh.goodsugar.board.model.dto.Board">
+        SELECT
+            B.BOARD_ID        AS boardId,
+            B.BOARD_TITLE     AS boardTitle,
+            B.BOARD_CONTENT   AS boardContent,
+            B.BOARD_VIEW_COUNT AS boardViewCount,
+            B.BOARD_CREATE    AS boardCreate,
+            S.SNACK_ID        AS snackId,
+            S.DETAILS,
+            S.BLOOD_SUGAR_F   AS bloodSugarF,
+            S.BLOOD_SUGAR_S   AS bloodSugarS,
+            S.FASTING_GLU     AS fastingGlu,
+            S.EXER,
+            S.TASTERATING
+        FROM "BOARD" B
+        /* 수정 포인트: MEMBER_ID가 아닌 BOARD_ID로 조인해야 정확한 게시글 상세 정보가 매칭됩니다 */
+        JOIN "SNACK" S ON (B.BOARD_ID = S.BOARD_ID) 
+        WHERE B.BOARD_DELETED_FL = 'N'
+        AND B.BOARD_TYPE_ID = 2
+        ORDER BY B.BOARD_ID DESC
+    </select>
 
+    <insert id="insertBoard" parameterType="edu.kh.goodsugar.board.model.dto.Board">
+        <selectKey keyProperty="boardId" resultType="_int" order="BEFORE">
+            SELECT SEQ_BOARD_ID.NEXTVAL FROM DUAL
+        </selectKey>
 
+        INSERT INTO "BOARD" (
+            BOARD_ID, 
+            BOARD_TITLE, 
+            BOARD_CONTENT, 
+            MEMBER_ID, 
+            BOARD_TYPE_ID, 
+            BOARD_CREATE
+        ) VALUES (
+            #{boardId}, 
+            #{boardTitle}, 
+            #{boardContent}, 
+            #{memberId}, 
+            2, 
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <insert id="insertSnack">
+        INSERT INTO "SNACK" (
+            SNACK_ID, 
+            BOARD_ID,   MEMBER_ID, 
+            DETAILS, 
+            BLOOD_SUGAR_F, 
+            BLOOD_SUGAR_S, 
+            FASTING_GLU, 
+            EXER, 
+            TASTERATING
+        ) VALUES (
+            SEQ_SNACK_ID.NEXTVAL, 
+            #{boardId}, 
+            #{memberId}, 
+            #{details}, 
+            #{bloodSugarF}, 
+            #{bloodSugarS}, 
+            #{fastingGlu}, 
+            #{exer}, 
+            #{tasterating}
+        )
+    </insert>
    
 </mapper>

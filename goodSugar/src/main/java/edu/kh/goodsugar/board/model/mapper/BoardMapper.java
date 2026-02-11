@@ -12,5 +12,9 @@ public interface BoardMapper {
 	List<Board> selectBoardList();
 	
 	List<Board> selectSnackList();
+
+	int insertBoard(Board board);
+
+	int insertSnack(Board board);
 	
 }
