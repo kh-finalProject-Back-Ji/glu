@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.kh.goodsugar.health.model.mapper.DiabetesProfileMapper">
+
+  <!-- 조회 -->
+  <select id="selectByMemberId"
+          parameterType="long"
+          resultType="edu.kh.goodsugar.health.model.dto.DiabetesProfile">
+
+    SELECT
+      MEMBER_ID           AS memberId,
+      DIABETES_TYPE       AS diabetesType,
+      DIAGNOSE_AT         AS diagnoseAt,
+      HBA1C_VALUE         AS hba1cValue,
+      HBA1C_DATE          AS hba1cDate,
+      HAS_COMPLICATION    AS hasComplication,
+      WEIGHT              AS weight,
+      MEDICATION_INFO     AS medicationInfo,
+      FAMILY_HISTORY_YN   AS familyHistoryYn,
+      CREATED_AT          AS createdAt,
+      UPDATED_AT          AS updatedAt
+    FROM DIABETES_PROFILE
+    WHERE MEMBER_ID = #{memberId}
+
+  </select>
+
+
+  <!-- 업서트 (없으면 INSERT, 있으면 UPDATE) -->
+  <insert id="upsert"
+          parameterType="edu.kh.goodsugar.health.model.dto.DiabetesProfile">
+
+    MERGE INTO DIABETES_PROFILE t
+    USING (SELECT #{memberId} AS MEMBER_ID FROM dual) s
+    ON (t.MEMBER_ID = s.MEMBER_ID)
+
+    WHEN MATCHED THEN
+      UPDATE SET
+        DIABETES_TYPE     = #{diabetesType},
+        DIAGNOSE_AT       = #{diagnoseAt},
+        HBA1C_VALUE       = #{hba1cValue},
+        HBA1C_DATE        = #{hba1cDate},
+        HAS_COMPLICATION  = #{hasComplication},
+        WEIGHT            = #{weight},
+        MEDICATION_INFO   = #{medicationInfo},
+        FAMILY_HISTORY_YN = #{familyHistoryYn},
+        UPDATED_AT        = SYSTIMESTAMP
+
+    WHEN NOT MATCHED THEN
+      INSERT (
+        MEMBER_ID,
+        DIABETES_TYPE,
+        DIAGNOSE_AT,
+        HBA1C_VALUE,
+        HBA1C_DATE,
+        HAS_COMPLICATION,
+        WEIGHT,
+        MEDICATION_INFO,
+        FAMILY_HISTORY_YN,
+        CREATED_AT,
+        UPDATED_AT
+      )
+      VALUES (
+        #{memberId},
+        #{diabetesType},
+        #{diagnoseAt},
+        #{hba1cValue},
+        #{hba1cDate},
+        #{hasComplication},
+        #{weight},
+        #{medicationInfo},
+        #{familyHistoryYn},
+        SYSTIMESTAMP,
+        SYSTIMESTAMP
+      )
+
+  </insert>
+
+</mapper>

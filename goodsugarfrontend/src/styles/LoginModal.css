@@ -1,0 +1,166 @@
+:root{
+  --theme:#F0E68C;
+  --pink:#e84c7a;
+  --line: rgba(0,0,0,0.12);
+  --text:#222;
+  --muted: rgba(0,0,0,0.58);
+}
+
+/* ✅ 모달 안에서만 영향 주게 스코프를 loginM으로 강하게 잡음 */
+.loginM{
+  width: 100%;
+  display: grid;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+/* ✅ 로고가 원본 크기로 튀는거 방지 */
+.loginM img{
+  max-width: 100%;
+  height: auto;
+}
+
+.loginM__brandWrap{
+  width: 100%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 2px;
+}
+
+.loginM__brandRow{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loginM__logo{
+  width: 42px !important;
+  height: 42px !important;
+  object-fit: contain;
+  display: block;
+}
+
+.loginM__title{
+  font-size: 24px;
+  font-weight: 1000;
+  letter-spacing: -0.03em;
+  color: var(--pink);
+  line-height: 1;
+}
+
+.loginM__form{
+  display:grid;
+  gap: 10px;
+}
+
+.loginM__label{
+  display:grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.loginM__input{
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 0 12px;
+  outline: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.loginM__input:focus{
+  border-color: rgba(232,76,122,0.35);
+  box-shadow: 0 0 0 3px rgba(232,76,122,0.12);
+}
+
+.loginM__btn{
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+}
+
+.loginM__btn--primary{
+  background: var(--theme);
+  border-color: rgba(226,215,109,0.95);
+  color: #222;
+}
+
+.loginM__btn--outline{
+  background: #fff;
+  color: var(--pink);
+  border-color: rgba(232,76,122,0.25);
+}
+
+.loginM__divider{
+  position: relative;
+  text-align: center;
+  margin: 2px 0 0;
+}
+
+.loginM__divider::before{
+  content:"";
+  position:absolute;
+  left:0; right:0;
+  top:50%;
+  height:1px;
+  background: rgba(0,0,0,0.08);
+  transform: translateY(-50%);
+}
+
+.loginM__divider span{
+  position: relative;
+  background: #fff;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.loginM__social{
+  display:grid;
+  gap: 10px;
+}
+
+.loginM__socialBtn{
+  height: 46px;
+  border-radius: 14px;
+  font-weight: 1000;
+  cursor: pointer;
+  border: none;
+}
+
+.loginM__socialBtn.google{
+  background: #fff;
+  border: 1px solid #dadce0;
+  color: #1f1f1f;
+}
+
+.loginM__socialBtn.kakao{
+  background: #FEE500;
+  border: 1px solid #FEE500;
+  color: #191600;
+}
+
+.loginM__socialBtn.naver{
+  background: #03C75A;
+  border: 1px solid #03C75A;
+  color: #fff;
+}
+
+.loginM__footnote{
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.55);
+  margin-top: 2px;
+}

@@ -1,0 +1,172 @@
+.cal-cell{
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 10px 10px 12px;
+  min-height: 92px;
+  background: #fff;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  overflow: hidden;
+}
+
+.cal-cell:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+}
+
+.cal-cell.today{
+  border-color: rgba(232,76,122,0.35);
+}
+
+.cal-cell.selected{
+  outline: 2px solid rgba(232,76,122,0.20);
+  outline-offset: 1px;
+}
+
+/* 1줄 */
+.cal-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cal-dayNum{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 900;
+  font-size: 14px;
+  color: rgba(0,0,0,0.85);
+}
+
+.cal-todayDot{
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(232,76,122,0.85);
+  display: inline-block;
+}
+
+/* ✅ 총기록: pill/테두리/배경 전부 제거 */
+.cal-countText{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.55);
+  white-space: nowrap;
+}
+.cal-countText b{ color: rgba(0,0,0,0.85); }
+
+/* 2줄 */
+.cal-mid{ margin-top: 8px; }
+
+/* ✅ 공복: pill/테두리/배경 전부 제거 */
+.cal-fastingText{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.55);
+}
+.cal-fastingText b.on{ color: rgba(0,0,0,0.88); }
+.cal-fastingText b.off{ color: rgba(0,0,0,0.35); }
+
+/* 3줄: 이모티콘 */
+.cal-bottom{
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+
+/* ✅ 이모티콘 pill 테두리/배경 제거: 그냥 이모지로만 */
+.cal-ic{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-iconsEmpty{
+  font-size: 12px;
+  font-weight: 800;
+  opacity: .35;
+}
+
+/* ✅ hover 버튼: 큰 테두리 박스 제거 + 겹침 방지 + 작성하기 가로 크게 */
+.cal-hoverBtns{
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  /* 박스 느낌 제거 */
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+
+  flex-wrap: nowrap;     /* 줄바꿈 방지 */
+}
+
+/* 버튼 공통 */
+.cal-btn{
+  border: 0;
+  outline: 0;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;   /* 텍스트 줄바꿈 방지 */
+  min-width: 0;
+}
+
+/* ✅ 수정 버튼은 작게 */
+.cal-btnGhost{
+  flex: 0 0 auto;
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.78);
+}
+.cal-btnGhost:hover{ background: rgba(0,0,0,0.08); }
+
+/* ✅ 작성하기는 옆으로 크게(남은 공간 다 먹기) */
+.cal-btnPrimary{
+  flex: 1 1 auto;                 /* ✅ 가로로 크게 */
+  background: #e84c7a;
+  color: #fff;
+}
+.cal-btnPrimary:hover{ filter: brightness(.96); }
+
+/* hover시 아래 버튼 영역 때문에 내용이 가려지지 않게 */
+.cal-cell.hover{
+  padding-bottom: 44px; /* 버튼 자리 확보 */
+}

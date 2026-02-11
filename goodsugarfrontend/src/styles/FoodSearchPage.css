@@ -1,0 +1,308 @@
+:root{
+  --pink: #e84c7a;
+  --khaki: #F0E68C;
+
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: rgba(17,24,39,0.62);
+  --line: rgba(17,24,39,0.10);
+
+  --shadowSoft: 0 10px 24px rgba(0,0,0,0.08);
+  --shadow: 0 16px 34px rgba(0,0,0,0.12);
+  --radius: 18px;
+}
+
+*{ box-sizing: border-box; }
+
+.food-page{
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+}
+
+/* ✅ 검색 전용 헤더: 화이트 + 얇은 보더 */
+.food-headerSearch{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.food-headerSearch__inner{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.food-title{
+  font-weight: 1000;
+  letter-spacing: -0.03em;
+  font-size: 20px;
+  color: var(--pink);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ✅ 검색창 길게 */
+.food-searchWide{
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 10px;
+  align-items: center;
+}
+
+.food-searchWide__box{
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadowSoft);
+  padding: 12px 46px 12px 44px;
+}
+
+.food-searchWide__icon{
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.70;
+}
+
+.food-searchWide__input{
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.food-searchWide__clear{
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,24,39,0.14);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.food-searchWide__btn{
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pink);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(232,76,122,0.22);
+}
+
+.food-main{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 18px 60px;
+}
+
+/* ✅ 메타 줄 */
+.food-metaRow{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 14px;
+}
+
+.food-metaRow__left{
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  font-size: 18px;
+}
+
+.food-metaRow__right{
+  font-weight: 900;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,24,39,0.12);
+  background: rgba(255,255,255,0.9);
+}
+
+/* Alert / Empty / Loading */
+.food-alert{
+  background: rgba(232,76,122,0.08);
+  border: 1px solid rgba(232,76,122,0.20);
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  font-weight: 900;
+}
+
+.food-empty{
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadowSoft);
+  padding: 44px 18px;
+  text-align: center;
+}
+.food-empty__emoji{ font-size: 28px; }
+.food-empty__title{ margin-top: 10px; font-weight: 900; font-size: 18px; }
+.food-empty__desc{ margin-top: 6px; color: var(--muted); font-weight: 800; }
+
+.food-skeleton{
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadowSoft);
+  padding: 18px;
+}
+
+.food-skeleton__title{
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+.food-skeleton__grid{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.food-skeleton__pill{
+  height: 46px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(17,24,39,0.05), rgba(17,24,39,0.10), rgba(17,24,39,0.05));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer{
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ✅ 결과 Grid */
+.food-grid{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ✅ 카드 */
+.food-card{
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadowSoft);
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+.food-card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(232,76,122,0.22);
+  box-shadow: var(--shadow);
+}
+
+.food-card__name{
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  font-size: 14px;
+  line-height: 1.25;
+  min-height: 40px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.food-card__footer{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.food-card__chip{
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(232,76,122,0.10);
+  border: 1px solid rgba(232,76,122,0.18);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+/* ✅ 페이지네이션 맨 아래 */
+.food-pagerBottom{
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.food-pagerBottom__btn{
+  border: 1px solid rgba(17,24,39,0.12);
+  background: #fff;
+  border-radius: 999px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 1000;
+}
+.food-pagerBottom__btn:disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.food-pagerBottom__nums{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.food-pagerBottom__num{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,24,39,0.12);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 1000;
+}
+.food-pagerBottom__num.is-active{
+  background: rgba(232,76,122,0.12);
+  border-color: rgba(232,76,122,0.30);
+}
+
+.food-pagerBottom__dots{
+  color: rgba(17,24,39,0.55);
+  font-weight: 1000;
+  padding: 0 4px;
+}
+
+/* Responsive */
+@media (max-width: 1100px){
+  .food-headerSearch__inner{ grid-template-columns: 1fr; }
+  .food-searchWide{ grid-template-columns: 1fr 96px; }
+  .food-grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .food-skeleton__grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 680px){
+  .food-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .food-skeleton__grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .food-metaRow__left{ font-size: 16px; }
+}

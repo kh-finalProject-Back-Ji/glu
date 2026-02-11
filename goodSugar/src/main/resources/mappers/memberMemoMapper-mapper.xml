@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.kh.goodsugar.member.model.mapper.MemberMemoMapper">
+
+  <resultMap id="MemberMemoMap" type="edu.kh.goodsugar.member.model.dto.MemberMemo">
+    <id property="memberId" column="MEMBER_ID"/>
+    <result property="memo" column="MEMO"/>
+    <result property="createdAt" column="CREATED_AT"/>
+    <result property="updatedAt" column="UPDATED_AT"/>
+  </resultMap>
+
+  <select id="selectMemberMemo" resultMap="MemberMemoMap">
+    SELECT MEMBER_ID, MEMO, CREATED_AT, UPDATED_AT
+    FROM MEMBER_MEMO
+    WHERE MEMBER_ID = #{memberId}
+  </select>
+
+  <!-- Oracle UPSERT: MEMBER_ID가 있으면 UPDATE, 없으면 INSERT -->
+  <update id="upsertMemberMemo">
+    MERGE INTO MEMBER_MEMO t
+    USING (
+      SELECT #{memberId} AS MEMBER_ID,
+             #{memo}     AS MEMO
+      FROM dual
+    ) s
+    ON (t.MEMBER_ID = s.MEMBER_ID)
+    WHEN MATCHED THEN
+      UPDATE SET
+        t.MEMO = s.MEMO,
+        t.UPDATED_AT = SYSTIMESTAMP
+    WHEN NOT MATCHED THEN
+      INSERT (MEMBER_ID, MEMO, CREATED_AT, UPDATED_AT)
+      VALUES (s.MEMBER_ID, s.MEMO, SYSTIMESTAMP, SYSTIMESTAMP)
+  </update>
+
+</mapper>
