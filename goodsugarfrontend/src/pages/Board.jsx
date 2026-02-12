@@ -191,7 +191,6 @@ const Board = () => {
                             <span className={`tag ${isEaten ? 'tag-eaten' : 'tag-want'}`}>
                               {isEaten ? '먹음' : '먹고 싶다'}
                             </span>
-                            <span className="tag tag-category">간식</span>
                           </div>
 
                           <p className="post-content">{post.boardContent}</p>
