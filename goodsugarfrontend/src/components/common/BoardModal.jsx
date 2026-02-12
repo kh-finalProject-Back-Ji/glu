@@ -5,8 +5,6 @@ import {
 } from "reactstrap";
 import '../../styles/BoardModal.css'
 
-function BoardModal({ isModal, modalViewToggle, createBoard, mode, updateData, updateIndex, updateBoard }) {
-
   const initialForm = {
     status: '먹음', 
     title: '',
@@ -20,6 +18,7 @@ function BoardModal({ isModal, modalViewToggle, createBoard, mode, updateData, u
     boardTypeId: 2
   };
 
+function BoardModal({ isModal, modalViewToggle, createBoard, mode, updateData, updateIndex, updateBoard }) {
   const [inputCreate, setInputCreate] = useState(initialForm);
   const [inputUpdate, setInputUpdate] = useState({});
 
@@ -99,12 +98,12 @@ function BoardModal({ isModal, modalViewToggle, createBoard, mode, updateData, u
                 <hr />
                 <h5 className="mb-3">📈 혈당 및 맛 평가</h5>
                 <Row>
-                  <Col md={4}><FormGroup><Label>공복</Label><Input type="number" name="fastingGlu" value={data.fastingGlu || ""} onChange={handleInputChange} /></FormGroup></Col>
-                  <Col md={4}><FormGroup><Label>1시간</Label><Input type="number" name="bloodSugarF" value={data.bloodSugarF || ""} onChange={handleInputChange} /></FormGroup></Col>
-                  <Col md={4}><FormGroup><Label>2시간</Label><Input type="number" name="bloodSugarS" value={data.bloodSugarS || ""} onChange={handleInputChange} /></FormGroup></Col>
+                  <Col><Label>공복</Label><Input type="number" name="fastingGlu" value={data.fastingGlu || ""} onChange={handleInputChange} /></Col>
+                  <Col><Label>1시간</Label><Input type="number" name="bloodSugarF" value={data.bloodSugarF || ""} onChange={handleInputChange} /></Col>
+                  <Col><Label>2시간</Label><Input type="number" name="bloodSugarS" value={data.bloodSugarS || ""} onChange={handleInputChange} /></Col>
                 </Row>
                 <Row>
-                  <Col md={6}>
+                  <Col>
                     <FormGroup>
                       <Label>운동 여부</Label>
                       <Input type="select" name="exer" value={data.exer || "N"} onChange={handleInputChange}>
@@ -113,11 +112,12 @@ function BoardModal({ isModal, modalViewToggle, createBoard, mode, updateData, u
                       </Input>
                     </FormGroup>
                   </Col>
-                  <Col md={6}>
-                    <FormGroup>
-                      <Label>맛 평가 ({data.tasterating || 3}점)</Label>
-                      <Input type="range" name="tasterating" min="1" max="5" value={data.tasterating || 3} onChange={handleInputChange} />
-                    </FormGroup>
+                  <Col>
+                    <Row>
+                      <Col><Label>맛 평가 ({data.tasterating || 3}점)</Label>
+                      <Input type="range" name="tasterating" min="1" max="5" value={data.tasterating || 3} onChange={handleInputChange} /></Col>
+                      <Col><Label>먹은 양</Label><Input placeholder="최대한 자세하게 적어주세요!" name="details" value={data.details || ""} onChange={handleInputChange} /></Col>
+                    </Row>
                   </Col>
                 </Row>
               </div>
@@ -133,7 +133,7 @@ function BoardModal({ isModal, modalViewToggle, createBoard, mode, updateData, u
               <Col>
                 <Button color={mode === "create" ? "success" : "primary"} 
                         onClick={() => mode === "create" ? createBoard(inputCreate) : updateBoard(inputUpdate, updateIndex)}>
-                  {mode === "create" ? "기록하기" : "수정완료"}
+                  {mode === "create" ? "등록" : "수정"}
                 </Button>
                 <Button color="secondary" onClick={modalViewToggle} className="ms-2">취소</Button>
               </Col>

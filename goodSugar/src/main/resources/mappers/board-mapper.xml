@@ -3,29 +3,29 @@
 
 <mapper namespace="edu.kh.goodsugar.board.model.mapper.BoardMapper">
 
-   <select id="selectBoardList" resultType="edu.kh.goodsugar.board.model.dto.Board">
-    SELECT 
-        B.BOARD_ID          AS boardId,
-        B.BOARD_TITLE       AS boardTitle,
-        B.BOARD_CONTENT     AS boardContent,
-        B.BOARD_VIEW_COUNT  AS boardViewCount,
-        B.BOARD_CREATE      AS boardCreate,
-        B.BOARD_TYPE_ID     AS boardTypeId,
-        B.IS_ANONYMOUS_YN   AS isAnonymousYn,
-        M.NICKNAME,
-        S.SNACK_ID          AS snackId,
-        S.DETAILS,
-        S.BLOOD_SUGAR_F     AS bloodSugarF,
-        S.BLOOD_SUGAR_S     AS bloodSugarS,
-        S.FASTING_GLU       AS fastingGlu,
-        S.EXER,
-        S.TASTERATING
-    FROM "BOARD" B
-    JOIN "MEMBER" M ON (B.MEMBER_ID = M.MEMBER_ID)
-    LEFT JOIN "SNACK" S ON (B.BOARD_ID = S.BOARD_ID) -- 간식 정보가 있으면 가져오고 없으면 NULL
-    WHERE B.BOARD_DELETED_FL = 'N'
-    ORDER BY B.BOARD_ID DESC
-</select>
+    <select id="selectBoardList" resultType="edu.kh.goodsugar.board.model.dto.Board">
+        SELECT 
+            B.BOARD_ID          AS boardId,
+            B.BOARD_TITLE       AS boardTitle,
+            B.BOARD_CONTENT     AS boardContent,
+            B.BOARD_VIEW_COUNT  AS boardViewCount,
+            B.BOARD_CREATE      AS boardCreate,
+            B.BOARD_TYPE_ID     AS boardTypeId,
+            B.IS_ANONYMOUS_YN   AS isAnonymousYn,
+            M.NICKNAME,
+            S.SNACK_ID          AS snackId,
+            S.DETAILS,
+            S.BLOOD_SUGAR_F     AS bloodSugarF,
+            S.BLOOD_SUGAR_S     AS bloodSugarS,
+            S.FASTING_GLU       AS fastingGlu,
+            S.EXER,
+            S.TASTERATING
+        FROM "BOARD" B
+        JOIN "MEMBER" M ON (B.MEMBER_ID = M.MEMBER_ID)
+        LEFT JOIN "SNACK" S ON (B.BOARD_ID = S.BOARD_ID)
+        WHERE B.BOARD_DELETED_FL = 'N'
+        AND B.BOARD_TYPE_ID = 1  ORDER BY B.BOARD_ID DESC
+    </select>
 
     <select id="selectSnackList" resultType="edu.kh.goodsugar.board.model.dto.Board">
         SELECT
@@ -34,7 +34,7 @@
             B.BOARD_CONTENT   AS boardContent,
             B.BOARD_VIEW_COUNT AS boardViewCount,
             B.BOARD_CREATE    AS boardCreate,
-            S.SNACK_ID        AS snackId,
+            B.BOARD_TYPE_ID   AS boardTypeId, S.SNACK_ID        AS snackId,
             S.DETAILS,
             S.BLOOD_SUGAR_F   AS bloodSugarF,
             S.BLOOD_SUGAR_S   AS bloodSugarS,
@@ -42,11 +42,9 @@
             S.EXER,
             S.TASTERATING
         FROM "BOARD" B
-        /* 수정 포인트: MEMBER_ID가 아닌 BOARD_ID로 조인해야 정확한 게시글 상세 정보가 매칭됩니다 */
         JOIN "SNACK" S ON (B.BOARD_ID = S.BOARD_ID) 
         WHERE B.BOARD_DELETED_FL = 'N'
-        AND B.BOARD_TYPE_ID = 2
-        ORDER BY B.BOARD_ID DESC
+        AND B.BOARD_TYPE_ID = 2 ORDER BY B.BOARD_ID DESC
     </select>
 
     <insert id="insertBoard" parameterType="edu.kh.goodsugar.board.model.dto.Board">
@@ -66,15 +64,15 @@
             #{boardTitle}, 
             #{boardContent}, 
             #{memberId}, 
-            2, 
-            CURRENT_TIMESTAMP
+            #{boardTypeId}, CURRENT_TIMESTAMP
         )
     </insert>
 
     <insert id="insertSnack">
         INSERT INTO "SNACK" (
             SNACK_ID, 
-            BOARD_ID,   MEMBER_ID, 
+            BOARD_ID,   
+            MEMBER_ID, 
             DETAILS, 
             BLOOD_SUGAR_F, 
             BLOOD_SUGAR_S, 
@@ -93,5 +91,4 @@
             #{tasterating}
         )
     </insert>
-   
 </mapper>

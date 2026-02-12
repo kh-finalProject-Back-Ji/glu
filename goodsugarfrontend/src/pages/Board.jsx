@@ -6,9 +6,11 @@ import axios from 'axios';
 import BoardModal from '../components/common/BoardModal';
 
 const Board = () => {
+  
   const [boardButton, setBoardButton] = useState('snack');
   const [selectedStatus, setSelectedStatus] = useState('전체');
   const [boardList, setBoardList] = useState([]);
+  const [snackdList, setSnackList] = useState([]);
   const statuses = ['전체', '먹고 싶다', '먹음'];
   const [isModal, setIsModal] = useState(false);
   const [modalMode, setModalMode] = useState("create");
@@ -23,7 +25,18 @@ const Board = () => {
   };
 
   useEffect(() => {
-    fetchAllBoards();
+    axios.get("http://localhost:12345/board?type=snack") // 파라미터 추가!
+      .then(res => {
+        setSnackList(res.data);
+      });
+  }, []);
+
+  // 자유 게시판 데이터를 가져올 때
+  useEffect(() => {
+    axios.get("http://localhost:12345/board") // 혹은 ?type=free
+      .then(res => {
+        setBoardList(res.data);
+      });
   }, []);
 
   const modalViewToggle = () => setIsModal(!isModal);
@@ -43,11 +56,14 @@ const Board = () => {
   };
 
   const handleCreateButtonClick = () => {
+    
     const memberId = getMemberIdFromToken();
     if (!memberId) {
-      alert("로그인 이후 이용해주세요. 🔒");
+      alert("로그인 이후 이용해주세요.");
       return;
     }
+    console.log("확인1 :", memberId);
+  
     setModalMode("create");
     modalViewToggle();
   };
@@ -56,6 +72,7 @@ const Board = () => {
     const memberId = getMemberIdFromToken();
     if (!memberId) {
       alert("로그인 세션이 만료되었습니다.");
+      modalViewToggle();
       return;
     }
 
@@ -105,9 +122,9 @@ const Board = () => {
             <Tab><button onClick={() => setBoardButton('good')} className={`board-button ${boardButton === 'good' ? 'board-button-active' : ''}`}>😋 추천 게시판</button></Tab>
           </TabList>
 
-          <BoardModal 
-            isModal={isModal} 
-            modalViewToggle={modalViewToggle} 
+          <BoardModal
+            isModal={isModal}
+            modalViewToggle={modalViewToggle}
             createBoard={createBoard}
             mode={modalMode}
             message={boardButton === 'snack' ? "간식" : "자유"}
@@ -147,10 +164,9 @@ const Board = () => {
 
               <div className="posts-grid">
                 {(() => {
-                  const snackPosts = boardList.filter(post => post.snackId !== 0);
-                  const filteredPosts = snackPosts.filter(post => {
+                  // snackPosts 대신 snackdList를 직접 필터링합니다.
+                  const filteredPosts = snackdList.filter(post => {
                     if (selectedStatus === '전체') return true;
-                    // 혈당 데이터 유무로 먹음/먹고싶다 판단
                     const isEaten = post.bloodSugarF > 0 || post.bloodSugarS > 0 || post.fastingGlu > 0;
                     return selectedStatus === '먹음' ? isEaten : !isEaten;
                   });
@@ -170,7 +186,7 @@ const Board = () => {
                             </div>
                           </div>
                           <p className="post-date">📅 {post.boardCreate}</p>
-                          
+
                           <div className="post-tags">
                             <span className={`tag ${isEaten ? 'tag-eaten' : 'tag-want'}`}>
                               {isEaten ? '먹음' : '먹고 싶다'}
@@ -179,8 +195,7 @@ const Board = () => {
                           </div>
 
                           <p className="post-content">{post.boardContent}</p>
-                          {post.details && <p className="post-details">📝 {post.details}</p>}
-                          
+
                           {/* 💡 수정 포인트: 먹었을 때(isEaten)만 아래 정보들을 렌더링합니다. */}
                           {isEaten ? (
                             <>
@@ -195,11 +210,14 @@ const Board = () => {
                               {post.exer && (
                                 <div className="exer"><span>⚡ 운동 여부: {post.exer === 'Y' ? '운동함' : '안함'}</span></div>
                               )}
+
+                              <span className='detail-span'>📝먹은 양: {post.details}</span>
                               <div className="ratings">
                                 <div className="rating-row">
                                   <span className="rating-label">맛 평가</span>
                                   <div className="stars">{renderStars(post.tasterating)}</div>
                                 </div>
+
                               </div>
                             </>
                           ) : (
