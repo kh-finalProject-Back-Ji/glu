@@ -53,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                String memberId = claims.getSubject(); // createAccessToken에서 memberId를 subject로 넣었다고 가정
+                String memberId = claims.getSubject(); // createAccessToken에서 memberId를 subject로
                 if (memberId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                     var authToken = new UsernamePasswordAuthenticationToken(

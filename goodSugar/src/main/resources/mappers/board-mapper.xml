@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.kh.goodsugar.board.model.mapper.BoardMapper">
+
+  <sql id="defaultProfile">
+    '/img/default-profile.png'
+  </sql>
+
+  <!-- boardTypeId: 1 SNACK / 2 FREE / 3 RECOMMEND -->
+  <sql id="boardListWhere">
+    WHERE b.board_delete_fl = 'N'
+      AND b.board_type_id = #{boardTypeId}
+      <if test="q != null and q != ''">
+        AND (b.board_title LIKE '%'||#{q}||'%' OR b.board_content LIKE '%'||#{q}||'%')
+      </if>
+
+      <if test="boardTypeId == 1 and status != null and status != '' and status != '전체'">
+        AND sb.eat_status = #{status}
+      </if>
+  </sql>
+
+  <!-- ========== ID ========== -->
+  <select id="selectBoardNextId" resultType="long">
+    SELECT SEQ_BOARD.NEXTVAL FROM dual
+  </select>
+
+  <!-- ========== LIST COUNT ========== -->
+  <select id="selectBoardListCount" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM board b
+    <if test="boardTypeId == 1">
+      LEFT JOIN snack_board sb ON sb.board_id = b.board_id
+    </if>
+    <include refid="boardListWhere"/>
+  </select>
+
+  <!-- ========== LIST ========== -->
+  <select id="selectBoardList" parameterType="map"
+          resultType="edu.kh.goodsugar.board.model.dto.response.BoardListItemRes">
+    SELECT
+      b.board_id      AS boardId,
+      b.board_type_id AS boardTypeId,
+      b.board_title   AS title,
+      SUBSTR(b.board_content, 1, 120) AS preview,
+      b.board_create  AS createdAt,
+
+      <if test="boardTypeId == 1">
+        sb.eat_status AS eatStatus,
+      </if>
+      <if test="boardTypeId != 1">
+        NULL AS eatStatus,
+      </if>
+
+      (SELECT COUNT(*) FROM board_like bl WHERE bl.board_id = b.board_id) AS likeCount,
+      (SELECT COUNT(*) FROM board_comment bc WHERE bc.board_id = b.board_id AND bc.delete_fl = 'N') AS commentCount,
+
+      CASE
+        WHEN b.is_anonymous_yn = 'Y' THEN '익명1'
+        ELSE m.nickname
+      END AS writerName,
+
+      CASE
+        WHEN b.is_anonymous_yn = 'Y' THEN <include refid="defaultProfile"/>
+        ELSE NVL(m.profile_img, <include refid="defaultProfile"/>)
+      END AS writerProfileImg
+
+    FROM board b
+    JOIN member m ON m.member_id = b.member_id
+
+    <if test="boardTypeId == 1">
+      LEFT JOIN snack_board sb ON sb.board_id = b.board_id
+    </if>
+
+    <include refid="boardListWhere"/>
+
+    <choose>
+      <when test="sort == 'likes'">
+        ORDER BY likeCount DESC, b.board_id DESC
+      </when>
+      <when test="sort == 'comments'">
+        ORDER BY commentCount DESC, b.board_id DESC
+      </when>
+      <otherwise>
+        ORDER BY b.board_id DESC
+      </otherwise>
+    </choose>
+
+    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+  </select>
+
+  <!-- ========== DETAIL ========== -->
+  <select id="selectBoardDetail"
+          resultType="edu.kh.goodsugar.board.model.dto.response.BoardDetailRes">
+    SELECT
+      b.board_id AS boardId,
+      b.board_type_id AS boardTypeId,
+      b.board_title AS title,
+      b.board_content AS content,
+      b.board_create AS createdAt,
+      b.board_update AS updatedAt,
+      b.board_view_count AS viewCount,
+
+      (SELECT COUNT(*) FROM board_like bl WHERE bl.board_id = b.board_id) AS likeCount,
+      (SELECT COUNT(*) FROM board_comment bc WHERE bc.board_id = b.board_id AND bc.delete_fl = 'N') AS commentCount,
+
+      CASE
+        WHEN b.is_anonymous_yn = 'Y' THEN '익명1'
+        ELSE m.nickname
+      END AS writerName,
+
+      CASE
+        WHEN b.is_anonymous_yn = 'Y' THEN <include refid="defaultProfile"/>
+        ELSE NVL(m.profile_img, <include refid="defaultProfile"/>)
+      END AS writerProfileImg,
+
+      b.member_id AS writerMemberId
+
+    FROM board b
+    JOIN member m ON m.member_id = b.member_id
+    WHERE b.board_id = #{boardId}
+      AND b.board_delete_fl = 'N'
+  </select>
+
+  <select id="selectSnackDetail" resultType="edu.kh.goodsugar.board.model.dto.SnackDetailDto">
+    SELECT
+      board_id AS boardId,
+      use_medication_yn AS useMedicationYn,
+      use_injection_yn AS useInjectionYn,
+      glucose_type AS glucoseType,
+      glucose_value AS glucoseValue,
+      measure_time AS measureTime,
+      measure_type AS measureType,
+      snack_type AS snackType,
+      eat_status AS eatStatus,
+      taste_score AS tasteScore,
+      health_score AS healthScore
+    FROM snack_board
+    WHERE board_id = #{boardId}
+  </select>
+
+  <select id="selectRecommendDetail" resultType="edu.kh.goodsugar.board.model.dto.RecommendDetailDto">
+    SELECT
+      board_id AS boardId,
+      place_name AS placeName,
+      address AS address,
+      latitude AS latitude,
+      longitude AS longitude,
+      food_name AS foodName,
+      diabetic_reason AS diabeticReason,
+      map_provider AS mapProvider,
+      place_url AS placeUrl
+    FROM diabetic_recommend_board
+    WHERE board_id = #{boardId}
+  </select>
+
+  <select id="selectBoardImages" resultType="edu.kh.goodsugar.board.model.dto.BoardImageDto">
+    SELECT
+      image_id AS imageId,
+      board_id AS boardId,
+      image_url AS imageUrl,
+      sort_order AS sortOrder,
+      create_date AS createDate
+    FROM board_image
+    WHERE board_id = #{boardId}
+    ORDER BY sort_order ASC, image_id ASC
+  </select>
+
+  <update id="increaseViewCount">
+    UPDATE board
+    SET board_view_count = NVL(board_view_count,0) + 1
+    WHERE board_id = #{boardId}
+  </update>
+
+  <!-- ========== BOARD CRUD ========== -->
+  <insert id="insertBoard" parameterType="map">
+    INSERT INTO board(
+      board_id, board_title, board_content,
+      board_view_count, board_delete_fl,
+      board_create, board_update,
+      board_type_id,
+      is_anonymous_yn, anonymous_name,
+      member_id
+    )
+    VALUES(
+      #{boardId}, #{title}, #{content},
+      0, 'N',
+      SYSTIMESTAMP, NULL,
+      #{boardTypeId},
+      #{isAnonymousYn}, NULL,
+      #{memberId}
+    )
+  </insert>
+
+  <update id="updateBoard" parameterType="map">
+    UPDATE board
+    SET board_title = #{title},
+        board_content = #{content},
+        board_update = SYSTIMESTAMP,
+        is_anonymous_yn = #{isAnonymousYn}
+    WHERE board_id = #{boardId}
+      AND member_id = #{memberId}
+      AND board_delete_fl = 'N'
+  </update>
+
+  <update id="softDeleteBoard">
+    UPDATE board
+    SET board_delete_fl = 'Y',
+        board_update = SYSTIMESTAMP
+    WHERE board_id = #{boardId}
+      AND member_id = #{memberId}
+      AND board_delete_fl = 'N'
+  </update>
+
+  <!-- ========== TYPE DETAIL CRUD ========== -->
+  <insert id="insertSnackDetail" parameterType="edu.kh.goodsugar.board.model.dto.SnackDetailDto">
+    INSERT INTO snack_board(
+      board_id,
+      use_medication_yn, use_injection_yn,
+      glucose_type, glucose_value,
+      measure_time, measure_type,
+      snack_type, eat_status,
+      taste_score, health_score
+    )
+    VALUES(
+      #{boardId},
+      #{useMedicationYn}, #{useInjectionYn},
+      #{glucoseType}, #{glucoseValue},
+      #{measureTime}, #{measureType},
+      #{snackType}, #{eatStatus},
+      #{tasteScore}, #{healthScore}
+    )
+  </insert>
+
+  <update id="updateSnackDetail" parameterType="edu.kh.goodsugar.board.model.dto.SnackDetailDto">
+    UPDATE snack_board
+    SET use_medication_yn = #{useMedicationYn},
+        use_injection_yn  = #{useInjectionYn},
+        glucose_type      = #{glucoseType},
+        glucose_value     = #{glucoseValue},
+        measure_time      = #{measureTime},
+        measure_type      = #{measureType},
+        snack_type        = #{snackType},
+        eat_status        = #{eatStatus},
+        taste_score       = #{tasteScore},
+        health_score      = #{healthScore}
+    WHERE board_id = #{boardId}
+  </update>
+
+  <insert id="insertRecommendDetail" parameterType="edu.kh.goodsugar.board.model.dto.RecommendDetailDto">
+    INSERT INTO diabetic_recommend_board(
+      board_id,
+      place_name, address, latitude, longitude,
+      food_name, diabetic_reason,
+      map_provider, place_url
+    )
+    VALUES(
+      #{boardId},
+      #{placeName}, #{address}, #{latitude}, #{longitude},
+      #{foodName}, #{diabeticReason},
+      #{mapProvider}, #{placeUrl}
+    )
+  </insert>
+
+  <update id="updateRecommendDetail" parameterType="edu.kh.goodsugar.board.model.dto.RecommendDetailDto">
+    UPDATE diabetic_recommend_board
+    SET place_name = #{placeName},
+        address = #{address},
+        latitude = #{latitude},
+        longitude = #{longitude},
+        food_name = #{foodName},
+        diabetic_reason = #{diabeticReason},
+        map_provider = #{mapProvider},
+        place_url = #{placeUrl}
+    WHERE board_id = #{boardId}
+  </update>
+
+  <!-- ========== IMAGES ========== -->
+  <insert id="insertBoardImage" parameterType="edu.kh.goodsugar.board.model.dto.BoardImageDto">
+    INSERT INTO board_image(
+      image_id, board_id, image_url, sort_order, create_date
+    )
+    VALUES(
+      SEQ_IMAGE.NEXTVAL, #{boardId}, #{imageUrl}, #{sortOrder}, SYSTIMESTAMP
+    )
+  </insert>
+
+  <delete id="deleteBoardImages">
+    DELETE FROM board_image WHERE board_id = #{boardId}
+  </delete>
+
+  <!-- ========== LIKE ========== -->
+  <select id="selectLikeExists" resultType="int">
+    SELECT COUNT(*)
+    FROM board_like
+    WHERE board_id = #{boardId}
+      AND member_id = #{memberId}
+  </select>
+
+  <insert id="insertLike">
+    INSERT INTO board_like(board_id, member_id, create_date)
+    VALUES(#{boardId}, #{memberId}, SYSTIMESTAMP)
+  </insert>
+
+  <delete id="deleteLike">
+    DELETE FROM board_like
+    WHERE board_id = #{boardId}
+      AND member_id = #{memberId}
+  </delete>
+
+  <select id="selectLikeCount" resultType="int">
+    SELECT COUNT(*) FROM board_like WHERE board_id = #{boardId}
+  </select>
+
+  <!-- ========== ANON MAP ========== -->
+  <select id="selectAnonNo" resultType="int">
+    SELECT anon_no
+    FROM board_anon_map
+    WHERE board_id = #{boardId}
+      AND member_id = #{memberId}
+  </select>
+
+  <select id="selectNextAnonNo" resultType="int">
+    SELECT NVL(MAX(anon_no), 0) + 1
+    FROM board_anon_map
+    WHERE board_id = #{boardId}
+  </select>
+
+  <insert id="insertAnonMap">
+    INSERT INTO board_anon_map(board_id, member_id, anon_no, create_date)
+    VALUES(#{boardId}, #{memberId}, #{anonNo}, SYSTIMESTAMP)
+  </insert>
+
+  <!-- ========== COMMENTS ========== -->
+  <select id="selectCommentsFlat" resultType="edu.kh.goodsugar.board.model.dto.CommentDto">
+    SELECT
+      c.comment_id AS commentId,
+      c.board_id AS boardId,
+      c.parent_comment_id AS parentCommentId,
+      c.member_id AS memberId,
+      c.comment_content AS commentContent,
+      c.is_anonymous_yn AS isAnonymousYn,
+      c.delete_fl AS deleteFl,
+      c.create_date AS createDate,
+      c.update_date AS updateDate,
+
+      CASE
+        WHEN c.is_anonymous_yn = 'Y' THEN (N'익명' || am.anon_no)
+        ELSE m.nickname
+      END AS writerName,
+
+      CASE
+        WHEN c.is_anonymous_yn = 'Y' THEN <include refid="defaultProfile"/>
+        ELSE NVL(m.profile_img, <include refid="defaultProfile"/>)
+      END AS writerProfileImg,
+
+      c.member_id AS writerMemberId
+
+    FROM board_comment c
+    JOIN member m ON m.member_id = c.member_id
+    LEFT JOIN board_anon_map am
+      ON am.board_id = c.board_id
+     AND am.member_id = c.member_id
+    WHERE c.board_id = #{boardId}
+    ORDER BY c.comment_id ASC
+  </select>
+
+  <insert id="insertComment" parameterType="edu.kh.goodsugar.board.model.dto.CommentDto">
+    INSERT INTO board_comment(
+      comment_id, board_id, parent_comment_id,
+      member_id, comment_content,
+      is_anonymous_yn, delete_fl,
+      create_date, update_date
+    )
+    VALUES(
+      SEQ_COMMENT.NEXTVAL, #{boardId}, #{parentCommentId},
+      #{memberId}, #{commentContent},
+      #{isAnonymousYn}, 'N',
+      SYSTIMESTAMP, NULL
+    )
+  </insert>
+
+  <update id="updateComment">
+    UPDATE board_comment
+    SET comment_content = #{content},
+        update_date = SYSTIMESTAMP
+    WHERE comment_id = #{commentId}
+      AND member_id = #{memberId}
+      AND delete_fl = 'N'
+  </update>
+
+  <update id="softDeleteComment">
+    UPDATE board_comment
+    SET delete_fl = 'Y',
+        update_date = SYSTIMESTAMP
+    WHERE comment_id = #{commentId}
+      AND member_id = #{memberId}
+      AND delete_fl = 'N'
+  </update>
+
+</mapper>
