@@ -5,7 +5,7 @@ import SignupModal from "./SignupModal";
 import Logo from "../../assets/LOGO.png";
 import "../../styles/LoginModal.css";
 
-const BACKEND = "http://localhost:12345";
+const BACKEND = process.env.REACT_APP_API_BASE || "http://localhost:12345";
 
 export default function LoginModal({ open, onClose, onLoginSuccess }) {
   const [form, setForm] = useState({ memberEmail: "", memberPw: "" });
