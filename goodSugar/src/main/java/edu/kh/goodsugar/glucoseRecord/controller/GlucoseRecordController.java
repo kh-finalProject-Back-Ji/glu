@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("glucose")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class GlucoseRecordController {
 
   private final GlucoseRecordService service;

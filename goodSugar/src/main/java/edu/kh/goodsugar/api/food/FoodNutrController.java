@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/foods")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class FoodNutrController {
 
   private final FoodNutrService service;

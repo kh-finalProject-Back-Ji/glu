@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/member") // ✅ /api로 통일 권장 (기존 /member 쓰고싶으면 그걸로 바꿔도 됨)
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+
 public class MemberController {
 
     private final MemberService service;
