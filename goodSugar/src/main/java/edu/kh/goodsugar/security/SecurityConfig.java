@@ -81,7 +81,9 @@ public class SecurityConfig {
                         "/api/member/email/**",
                         "/api/member/nickname/**",
                         "/api/member/email/exists",
+                        "/api/food/**",
                         "/api/member/nickname/exists"
+                        
                 ).permitAll()
 
                 // 나머지는 로그인 필요(POST/PUT/DELETE 게시판 포함)
