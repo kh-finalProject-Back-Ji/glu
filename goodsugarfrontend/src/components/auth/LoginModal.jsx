@@ -5,7 +5,9 @@ import SignupModal from "./SignupModal";
 import Logo from "../../assets/LOGO.png";
 import "../../styles/LoginModal.css";
 
-const BACKEND = process.env.REACT_APP_API_BASE || "http://localhost:12345";
+
+const OAUTH_BASE =
+  process.env.REACT_APP_OAUTH_BASE || "https://api.goodsugar.store";
 
 export default function LoginModal({ open, onClose, onLoginSuccess }) {
   const [form, setForm] = useState({ memberEmail: "", memberPw: "" });
@@ -44,9 +46,9 @@ export default function LoginModal({ open, onClose, onLoginSuccess }) {
     }
   };
 
-  const goOAuth = (provider) => {
-    window.location.href = `${BACKEND}/oauth2/authorization/${provider}`;
-  };
+ const goOAuth = (provider) => {
+  window.location.href = `${OAUTH_BASE}/oauth2/authorization/${provider}`;
+};
 
   return (
     <>
