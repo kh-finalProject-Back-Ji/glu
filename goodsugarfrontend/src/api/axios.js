@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = process.env.REACT_APP_API_BASE || "http://localhost:12345";
+const BASE_URL =
+  process.env.REACT_APP_API_BASE || "https://api.goodsugar.store";
 
 // ✅ 일반 API용 인스턴스
 const api = axios.create({

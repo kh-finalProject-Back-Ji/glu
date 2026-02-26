@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE || "http://localhost:12345",
+  baseURL: process.env.REACT_APP_API_BASE || "https://api.goodsugar.store",
   withCredentials: true,
 });
 
