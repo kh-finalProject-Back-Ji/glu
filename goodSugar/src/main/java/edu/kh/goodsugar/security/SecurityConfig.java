@@ -112,12 +112,12 @@ public class SecurityConfig {
                     String refresh = jwtProvider.createRefreshToken(memberId);
 
                     ResponseCookie cookie = ResponseCookie.from("refresh_token", refresh)
-                            .httpOnly(true)
-                            .secure(false)     // ✅ 운영 HTTPS 필수
-                            .sameSite("Lax")
-                            .path("/")
-                            .maxAge(60 * 60 * 24 * 14)
-                            .build();
+                    	    .httpOnly(true)
+                    	    .secure(true)        // ✅ 운영 HTTPS
+                    	    .sameSite("None")    // ✅ cross-site 쿠키 필요
+                    	    .path("/")
+                    	    .maxAge(60 * 60 * 24 * 14)
+                    	    .build();
 
                     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
