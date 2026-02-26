@@ -18,7 +18,7 @@ public class MemberMemoController {
     public ResponseEntity<MemberMemo> getMemo(@RequestParam("memberId") Long memberId) {
         MemberMemo memo = service.getMemo(memberId);
         if (memo == null) {
-            memo = new MemberMemo(memberId, "", null, null); // UX용: 빈 문자열 추천
+            memo = new MemberMemo(memberId, "", null, null);
         }
         return ResponseEntity.ok(memo);
     }
@@ -26,9 +26,9 @@ public class MemberMemoController {
     @PutMapping
     public ResponseEntity<String> saveMemo(@RequestBody MemberMemo body) {
         if (body == null || body.getMemberId() == null) {
-            return ResponseEntity.badRequest().body("memberId 필요");
+            return ResponseEntity.badRequest().body("memberId required");
         }
         service.saveMemo(body.getMemberId(), body.getMemo());
-        return ResponseEntity.ok("저장 완료");
+        return ResponseEntity.ok("saved");
     }
 }
