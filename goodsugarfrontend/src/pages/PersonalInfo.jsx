@@ -4,7 +4,7 @@ import "../styles/PersonalInfo.css";
 
 import DefaultProfile from "../assets/LOGOLOGINICON.png";
 
-const BACKEND = process.env.REACT_APP_API_BASE || "http://localhost:12345";
+const BACKEND = process.env.REACT_APP_API_BASE || "https://api.goodsugar.store";
 
 function resolveImgSrc(pathOrUrl) {
   if (!pathOrUrl) return "";
